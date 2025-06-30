@@ -4,39 +4,10 @@ import React from 'react'
 import { Image, Pressable, ScrollView, Text, View } from 'react-native'
 
 
-
-export const questionBank = {
-  "Math": [
-    {
-      id: 1,
-      subject: "Math",
-      title: "Question 1",
-      type: "MULTIPLE_CHOICE",
-      question: "What is 2+2?",
-      options: ["3", "4", "5", "6"],
-      answer: "4"
-    },
-    {
-      id: 2,
-      subject: "Math", 
-      title: "Question 2",
-      type: "LONG_ANSWER",
-      question: "Is π greater than 3?",
-      answer: "Yes"
-    }
-  ],
-  "Science": [
-    {
-      id: 1,
-      subject: "Science",
-      title: "Question 1",
-      type: "LONG_ANSWER",
-      question: "Explain photosynthesis",
-      minWords: 50,
-      modelAnswer: "Photosynthesis is..."
-    }
-  ]
-};
+export const questionBankAvaliable: {courseName : string, courseID : string, questionCount : number} [] = [
+  { courseName: 'Math', courseID : "1204889572890471", questionCount: 2 },
+  { courseName: 'Science', courseID: "5987259123456789" ,  questionCount: 1 },
+];
 
 const subject_selection = () => {
   return (
@@ -45,23 +16,25 @@ const subject_selection = () => {
       <Text className="text-5xl text-white font-bold mt-5 mb-3">題庫</Text>
       <ScrollView>
         <Text className="text-white" style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, }}>Select a Subject</Text>
-        {Object.keys(questionBank).map((subject) => (
-        <Link 
-          key={subject}
-          href={{
-            pathname: "/quiz/[subject]",
-            params: { 
-              subject: subject,
-              call: 'subject_selection'
-            }
-          }}
-          asChild
-        >
-          <Pressable style={{ padding: 20, backgroundColor: '#eee', marginBottom: 10 }}>
-            <Text>{subject} ({questionBank[subject as keyof typeof questionBank].length} questions)</Text>
-          </Pressable>
-        </Link>
-      ))}
+        {questionBankAvaliable.map((questionBank) => (
+          <Link
+            key={questionBank.courseID}
+            href={{
+              pathname: "/quiz/[subject]",
+              params: {
+                subject: questionBank.courseName,
+                id: questionBank.courseID,
+                questionCount: questionBank.questionCount,
+                call: 'subject_selection'
+              }
+            }}
+            asChild
+          >
+            <Pressable style={{ padding: 20, backgroundColor: '#eee', marginBottom: 10 }}>
+              <Text>{questionBank.courseName} ({questionBank.questionCount} questions)</Text>
+            </Pressable>
+          </Link>
+        ))}
       </ScrollView>
     </View>
   )
