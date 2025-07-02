@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, Text, TouchableOpacity } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
+
+async function save(key: string, value: string) {
+  await SecureStore.setItemAsync(key, value);
+}
 
 const login = () => {
     const [email, setEmail] = useState('');
@@ -8,7 +13,14 @@ const login = () => {
     const [rememberMe, setRememberMe] = useState(false);
 
     const handleLogin = () => {
-        // Handle login logic here
+        if (!email || !password) {
+            alert('Please enter both email and password');
+            return;
+        }
+
+        // For now just save the email to SecureStore
+        save('user', JSON.stringify({email}));
+        router.replace('/'); // Redirect to home page after login
     };
 
     const handleSignup = () => {
@@ -37,10 +49,6 @@ const login = () => {
                 secureTextEntry
             />
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <CheckBox
-                    value={rememberMe}
-                    onValueChange={setRememberMe}
-                />
                 <Text>Remember me</Text>
             </View>
             <TouchableOpacity onPress={handleForgotPassword}>

@@ -9,7 +9,7 @@ interface QuestionCardProps {
   index: number,
 }
 
-const QuestionCard = ({id, isMcQuestion, title, question, index}: QuestionCardProps) => {
+const QuestionCard = ({id, title}: QuestionCardProps) => {
   return (
     <View>
       <Text className="text-5xl text-white font-bold mt-5 mb-3">{id} {title}</Text>

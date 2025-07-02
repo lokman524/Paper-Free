@@ -3,9 +3,10 @@ import { images } from '@/constants/images'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import Results from '@/components/Results'
+import QuestionNav from './questionNav'
 
 
-interface Question {
+export interface Question {
     key: number,
     title: string,
     type: "MULTIPLE_CHOICE" | "LONG_ANSWER",
@@ -70,14 +71,17 @@ const questionDBData: questionBank[] = [
 
 const DisplayQuestion = () => {
 
+    const [startTime, setStartTime] = useState<number>(new Date().getTime());
+    const [elapsedTime, setElapsedTime] = useState<number>(0);
+
     const params = useLocalSearchParams();
     const id: string = params.id as string;
-    const courseName: string = params.subject as string;
+    const courseName: string = params.courseName as string;
 
     const [questions, setQuestions] = useState<Question[]>([]); // Initialize with an empty array
 
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
-    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [currentQuestion, setCurrentQuestion] = useState<number>(0);
     const [isQuizFinished, setIsQuizFinished] = useState(false);
 
 
@@ -87,7 +91,6 @@ const DisplayQuestion = () => {
         const fetchData = async () => {
             const questionBankData = questionDBData.find(item => item.courseID === id);
             if (questionBankData) {
-                console.log("Question Bank Data:", questionBankData);
                 setQuestions(questionBankData.questions);
                 setUserAnswers(new Array(questionBankData.questions.length).fill('')); // Initialize user answers
             }
@@ -97,9 +100,23 @@ const DisplayQuestion = () => {
 
     }, [])
 
+    // Set up an interval to update elapsed time every second
     useEffect(() => {
-        console.log(userAnswers);
-    }, [userAnswers])
+        const interval = setInterval(() => {
+            const currentTime = new Date().getTime();
+            setElapsedTime(currentTime - startTime);
+        }, 1000);
+        return () => clearInterval(interval); // Clear the interval on component unmount
+    }, [startTime]);
+
+    //format the elapsed time to a readable format (hours:minutes:seconds)
+    const formatElapsedTime = (time: number) => {
+        const seconds = Math.floor((time / 1000) % 60);
+        const minutes = Math.floor((time / (1000 * 60)) % 60);
+        const hours = Math.floor((time / (1000 * 60 * 60)) % 24);
+
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
 
     function handleSelectedOption(option : string) {
         const newUserAnswers = [...userAnswers];
@@ -179,13 +196,17 @@ const DisplayQuestion = () => {
     }
 
     if (isQuizFinished) {
-        return <Results userAnswers={userAnswers} questionBank={questions} restartQuiz={restartQuiz} />;
+        return <Results userAnswers={userAnswers} questionBank={questions} restartQuiz={restartQuiz} startTime={startTime} />;
     }
 
     return (
+        
         <View className='flex-1 bg-primary'>
             <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
             <Text className="text-5xl text-white font-bold mt-5 mb-3">{courseName}</Text>
+            <QuestionNav questions={questions} setQuestion={setCurrentQuestion}/>
+            <Text className='text-white text-xl mb-5'>Question {currentQuestion + 1} of {questions.length}</Text>
+            <Text className='text-white text-lg mb-5'>Time Elapsed: {formatElapsedTime(elapsedTime)} </Text>
             <ScrollView>
                 {renderQuestionContent()}
             </ScrollView>
