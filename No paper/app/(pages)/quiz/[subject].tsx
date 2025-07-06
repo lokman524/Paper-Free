@@ -3,8 +3,7 @@ import { images } from '@/constants/images'
 import { Link, router, useLocalSearchParams } from 'expo-router'
 import React, { useState, useEffect } from 'react'
 import { Alert, Button, FlatList, Image, Switch, Text, TextInput, View } from 'react-native'
-import { savedQuestions } from '@/app/(tabs)/saved'
-import subject_selection from '../subject_selection'
+
 
 const Subject = ({ }) => {
 
@@ -12,9 +11,7 @@ const Subject = ({ }) => {
 
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
     const [numberOfQuestionsInput, setNumberOfQuestionsInput] = useState("");
-    const [numberOfQuestions, setNumberOfQuestions] = useState(0);
     const [startQuestionInput, setStartQuestionInput] = useState("1");
-    const [startQuestion, setStartQuestion] = useState(1);
     const [isTimerEnabled, setIsTimerEnabled] = useState(false);
     const [isRandomEnabled, setIsRandomEnabled] = useState(false);
 
@@ -22,11 +19,12 @@ const Subject = ({ }) => {
     // This is used to determine the type of test the user wants to take
     const [testType, setTestType] = useState<TestTypeInterface>("-1");
 
-    //convert the query to string and number seperately
+    //convert the query to string and number separately
     const params = useLocalSearchParams();
     const id: string = params.id as string;
     const courseName: string = params.subject as string;
     const questionCount: number = Number(params.questionCount);
+    const call: string = params.call as string;
 
 
     // Check if the input is an integer
@@ -44,6 +42,7 @@ const Subject = ({ }) => {
 
     const toggleRandomSwitch = () => setIsRandomEnabled(previousState => !previousState);
 
+    //Validates the form input when the from is submitted
     const handleSubmit = () => {
         if (testType === "-1") {
             Alert.alert("Please select a test type");
@@ -69,13 +68,21 @@ const Subject = ({ }) => {
         else if (Number(startQuestionInput) > questionCount) {
             Alert.alert("Question number cannot be larger than the total number of questions")
         }
+        else if((Number(startQuestionInput)-1+Number(numberOfQuestionsInput)-1) > questionCount-1 ){
+            Alert.alert("Number of questions in this range is larger than the total number of questions")
+        }
         else {
+            setIsFormSubmitted(true);
             // Navigate to the actual quiz page with the selected parameters
             router.push({
                 pathname: "/quiz/Question/[id]",
                 params: {
                     id: id,                     //This is the course ID
                     courseName: courseName,     //This is the course name
+                    isTimerEnabled: isTimerEnabled.toString(), 
+                    call: call,                 //To determine weather the call is from the questionbank or saved page
+                    startQuestion: startQuestionInput,   
+                    numberOfQuestions: numberOfQuestionsInput,
                 }
             });
         }
@@ -83,23 +90,21 @@ const Subject = ({ }) => {
 
     const handleGoBack = () => {
         setIsFormSubmitted(false);
-        setNumberOfQuestions(0);
         setNumberOfQuestionsInput("");
         setStartQuestionInput("1");
-        setStartQuestion(1);
         setTestType("-1");
         setIsTimerEnabled(false);
         setIsRandomEnabled(false);
         router.back;
     }
 
-    /*useEffect (() => {
+    /* useEffect (() => {
         console.log("Test type: " + testType + 
-                    " Number of Questions: " + numberOfQuestions +
-                    " Start Question: " + startQuestion +
+                    " Number of Questions: " + numberOfQuestionsInput +
+                    " Start Question: " + startQuestionInput +
                     " Is Timer Enabled: " + isTimerEnabled +
                     " Is Random Enabled: " + isRandomEnabled)
-    }, [isFormSubmitted])*/
+    }, [isFormSubmitted]) */
 
     return (
         <View className='flex-1 bg-primary'>
