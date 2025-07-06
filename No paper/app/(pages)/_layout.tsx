@@ -10,7 +10,7 @@ export default function Layout() {
         {/* Stack navigator with all UI elements hidden */}
         <Stack
           screenOptions={{
-            headerShown: true,          // Hide all headers
+            headerShown: false,          // Hide all headers
             animation: 'none',           // Disable transition animations
             gestureEnabled: false,       // Disable swipe gestures
             contentStyle: {
