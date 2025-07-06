@@ -3,46 +3,10 @@ import React from 'react'
 import { images } from '@/constants/images'
 import { Link } from 'expo-router';
 
-export const savedQuestions = {
-  "錯題簿 1": [
-    {
-      id: 1,
-      subject: "Math",
-      title: "Question 1",
-      type: "MULTIPLE_CHOICE",
-      question: "What is 2+2?",
-      options: ["3", "4", "5", "6"],
-      answer: "4"
-    },
-    {
-      id: 2,
-      subject: "Math", 
-      title: "Question 2",
-      type: "LONG_ANSWER",
-      question: "Is π greater than 3?",
-      answer: "Yes"
-    },
-    {
-      id: 3,
-      subject: "Math", 
-      title: "Question 3",
-      type: "LONG_ANSWER",
-      question: "Is π greater than 3?",
-      answer: "Yes"
-    }
-  ],
-  "錯題簿 2": [
-    {
-      id: 1,
-      subject: "Science",
-      title: "Question 1",
-      type: "LONG_ANSWER",
-      question: "Explain photosynthesis",
-      minWords: 50,
-      modelAnswer: "Photosynthesis is..."
-    }
-  ]
-};
+export const savedQuestionsAvailable: {courseName : string, courseID : string, questionCount : number} [] = [
+  { courseName: 'Math', courseID : "1", questionCount: 2 },
+  { courseName: 'Science', courseID: "2" ,  questionCount: 1 },
+];
 
 
 const saved = () => {
@@ -53,20 +17,22 @@ const saved = () => {
           <Text className="text-5xl text-white font-bold mt-5 mb-3">錯題簿</Text>
           <ScrollView>
             <Text className="text-white" style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, }}>Select a 錯題簿</Text>
-            {Object.keys(savedQuestions).map((subject) => (
+            {savedQuestionsAvailable.map((savedQuestions) => (
             <Link 
-              key={subject}
+              key={savedQuestions.courseName}
               href={{
                 pathname: "/quiz/[subject]",
                 params: { 
-                  subject: subject,
-                  call: "saved"
+                  subject: savedQuestions.courseName,
+                  id: savedQuestions.courseID,
+                  questionCount: savedQuestions.questionCount,
+                  call: 'saved'
                 }
               }}
               asChild
             >
               <Pressable style={{ padding: 20, backgroundColor: '#eee', marginBottom: 10 }}>
-                <Text>{subject} ({savedQuestions[subject as keyof typeof savedQuestions].length} questions)</Text>
+                <Text>{savedQuestions.courseName} ({savedQuestions.questionCount} questions)</Text>
               </Pressable>
             </Link>
           ))}
