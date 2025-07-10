@@ -44,6 +44,7 @@ export default function Index() {
         <Button title="錯題簿" onPress={() => router.push("/saved")} />
         <Button title="學習記錄" onPress={() => router.push("/learning_record")} />
         <Button title="設定" onPress={() => router.push("/settings")} />
+        {<Button title="reset username and pw (for debug)" onPress={() => SecureStore.deleteItemAsync("user")}/>}
       </ScrollView>
     </View>
   );

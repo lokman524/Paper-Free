@@ -4,8 +4,8 @@ import { images } from '@/constants/images'
 import { Link } from 'expo-router';
 
 export const savedQuestionsAvailable: {courseName : string, courseID : string, questionCount : number} [] = [
-  { courseName: 'Math', courseID : "1", questionCount: 2 },
-  { courseName: 'Science', courseID: "2" ,  questionCount: 1 },
+  { courseName: '錯題簿 1', courseID : "1", questionCount: 2 },
+  { courseName: '錯題簿 2', courseID: "2" ,  questionCount: 1 },
 ];
 
 
