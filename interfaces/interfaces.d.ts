@@ -1,4 +1,20 @@
-//Not using any of these rn becoz i hate typescript
+import { Models } from "react-native-appwrite";
+
+interface User extends Models.Document {
+    name: string;
+    email: string;
+    avatar: string;
+}
+
+interface CreateUserParams {
+  email: string,
+  password: string,
+}
+
+interface SignInParams {
+  email: string,
+  password: string,
+}
 
 enum QuestionType {
   MULTIPLE_CHOICE = "MULTIPLE_CHOICE",

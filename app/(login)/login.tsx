@@ -1,30 +1,43 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, ScrollView} from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, ScrollView, Alert} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
+import { signIn } from '@/services/appwrite';
+import useAuthStore from '@/store/auth.store';
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
 }
 
-const login = () => {
+const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!email || !password) {
             alert('Please enter both email and password');
             return;
         }
-        
-        // For now just save the email to SecureStore
-        save('user', JSON.stringify({email}));
-        router.replace('/'); // Redirect to home page after login
+        try {
+            await signIn({email, password});
+            await useAuthStore.getState().fetchAuthenticatedUser();
+            router.replace('/');
+        } catch (error: any) {
+            if (
+                error.message?.toLowerCase().includes("invalid credentials") ||
+                error.code === 401
+            ) {
+                Alert.alert("Login Failed", "Wrong user name or password.");
+            } else {
+                Alert.alert("Error", error.message || "Login error");
+            }
+        }
     };
 
     const handleSignup = () => {
         // Handle signup navigation here
+        router.replace("/(login)/sign-up")
     };
 
     const handleForgotPassword = () => {
@@ -71,4 +84,4 @@ const login = () => {
     );
 };
 
-export default login;
+export default Login;

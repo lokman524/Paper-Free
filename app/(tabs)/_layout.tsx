@@ -1,9 +1,10 @@
 import React from 'react'
-import { Tabs } from 'expo-router'
+import { Redirect, Tabs } from 'expo-router'
 import { images } from '@/constants/images'
 import { icons } from '@/constants/icons'
 import { View, Text, ImageBackground } from 'react-native'
 import { Image } from 'react-native'
+import useAuthStore from '@/store/auth.store'
 
 const TabIcon = ({focused, icon, title}: any) => {
     if(focused){ 
@@ -25,6 +26,7 @@ const TabIcon = ({focused, icon, title}: any) => {
 }
 
 const _layout = () => {
+
   return (
     <Tabs
         screenOptions={{

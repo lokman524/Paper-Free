@@ -1,8 +1,16 @@
 import { Stack } from "expo-router";
 import './globals.css';
 import { StatusBar } from "react-native";
+import useAuthStore from "@/store/auth.store";
+import { useEffect } from "react";
 
 export default function RootLayout() {
+  const { isLoading, fetchAuthenticatedUser } = useAuthStore();
+
+  useEffect(() => {
+    fetchAuthenticatedUser();
+  },[]);
+
   return (
     <>
       <StatusBar hidden={true}/>
