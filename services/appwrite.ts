@@ -5,9 +5,9 @@ import { Account, Avatars, Client, Databases, ID, Query} from "react-native-appw
 export const appwriteConfig = {
     endpoint: process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!,
     projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
-    platform: "com.no_paper.no_paper_app",
-    databaseId: "686f801400210359c9af",
-    userCollectionId: "686f80480032ea8c9486",
+    platform: process.env.EXPO_PUBLIC_APPWRITE_PLATFORM!,
+    databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
+    userCollectionId: process.env.EXPO_PUBLIC_APPWRITE_USER_COLLECTION_ID!,
 }
 
 export const client = new Client();
