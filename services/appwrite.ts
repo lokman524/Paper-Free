@@ -59,17 +59,17 @@ export const signIn = async ({email, password}: SignInParams) => {
 export const getCurrentUser = async () => {
     try {
         const currentAccount = await account.get();
-        if (!currentAccount) throw Error;
+        if (!currentAccount) return null;
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
             [Query.equal("accountId", currentAccount.$id)]
         )
-        if (!currentAccount) throw Error;
+        if (!currentUser.documents.length) return null;
         return currentUser.documents[0];
     }
     catch (e){
-        console.log(e);
-        throw new Error(e as string);
+        console.log("getCurrentUser error: ", e);
+        return null;
     }
 }
