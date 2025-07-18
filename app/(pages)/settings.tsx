@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Button, Switch, TextInput } from 'react-native'
+import { View, Text, ScrollView, Button, Switch, TextInput, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { images } from '@/constants/images'
 import { Image } from 'react-native'
@@ -6,10 +6,15 @@ import { account, appwriteConfig, databases } from '@/services/appwrite'
 import authStore from '@/store/auth.store'
 import { router } from 'expo-router'
 import CustomDropdown from '@/components/DropdownList'
+import * as ImagePicker from 'expo-image-picker';
 
 const Settings = () => {
   const [showChangeNameInput, setShowChangeNameInput] = useState(false);
   const [newName, setNewName] = useState("");
+  const [showChangePasswordInput, setShowChangePasswordInput] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState(authStore.getState().user?.avatarUrl || "");
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showFontSizeDropDown, setShowFontSizeDropdown] = useState(false);
   const [fontSize, setFontSize] = useState("medium");
@@ -34,6 +39,59 @@ const Settings = () => {
     }
     catch (error) {
       console.error("Error changing name:", error);
+    }
+  }
+
+  const toggleShowChangePasswordInput = () => {
+    setShowChangePasswordInput(previousState => !previousState);
+  };
+
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      Alert.alert("Passwords do not match");
+      return;
+    }
+    else {
+      try {
+        await account.updatePassword(newPassword);
+        console.log("Password changed successfully");
+      } catch (error) {
+        console.error("Error changing password:", error);
+      }
+    }
+  };
+
+  const handleChangeIcon = async () => {
+    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+    if (!permissionResult.granted) {
+      Alert.alert("Permission to access camera roll is required!");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const uri = result.assets[0].uri;
+      const { user } = authStore.getState();
+      if (!user) return;
+      try{
+        await databases.updateDocument(
+          appwriteConfig.databaseId,
+          appwriteConfig.userCollectionId,
+          user.$id,
+          {avatar: uri}
+        );
+        authStore.getState().setUser({...user, avatar: uri});
+        Alert.alert("Icon updated successfully")
+      }
+      catch (e) {
+        Alert.alert("Error changing icon: " + e);
+      }
     }
   }
 
@@ -88,7 +146,34 @@ const Settings = () => {
             }} />
           </>
         )}
-        <Text className='text-white'>dark mode</Text>
+        {/* this feature does not work in Expo Go */}
+        <Button title='change password' onPress={() => toggleShowChangePasswordInput()}/>
+        {showChangePasswordInput && (
+          <>
+            <Text className='text-white'>New Password: </Text>
+            <TextInput 
+              className='h-10 border border-white rounded p-2 text-white'
+              placeholder="Enter new password"
+              placeholderTextColor="lightgray"
+              secureTextEntry={true}
+              onChangeText={text => setNewPassword(text)} />
+            <Text className='text-white'>Confirm New Password: </Text>
+            <TextInput
+              className='h-10 border border-white rounded p-2 text-white'
+              placeholder="Confirm new password"
+              placeholderTextColor="lightgray"
+              secureTextEntry={true}
+              onChangeText={text => setConfirmPassword(text)} />
+            <Button title="Submit" onPress={() => {
+              handleChangePassword();
+              setNewPassword(""); 
+              setConfirmPassword(""); 
+              setShowChangePasswordInput(false);
+            }} />
+          </>
+        )}
+        <Button title='change icon' onPress={() => handleChangeIcon()} />
+        <Text className='text-white text-center'>dark mode</Text>
           <Switch
             trackColor={{ false: '#767577', true: '#81b0ff' }}
             thumbColor={isDarkMode ? '#f5dd4b' : '#f4f3f4'}
