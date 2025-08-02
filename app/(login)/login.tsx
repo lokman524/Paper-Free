@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { signIn } from '@/services/appwrite';
 import useAuthStore from '@/store/auth.store';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 async function save(key: string, value: string) {
   await SecureStore.setItemAsync(key, value);
@@ -47,40 +48,43 @@ const Login = () => {
     const toggleRememberMe = () => setRememberMe(previousState => !previousState);
 
     return (
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-            <ScrollView className='bg-white h-full' keyboardShouldPersistTaps="handled">
-                <Text>Email</Text>
-                <TextInput
-                    value={email}
-                    onChangeText={setEmail}
-                    placeholder="Email"
-                    autoCapitalize="none"
-                    keyboardType="email-address"
-                />
-                <Text>Password</Text>
-                <TextInput
-                    value={password}
-                    onChangeText={setPassword}
-                    placeholder="Password"
-                    secureTextEntry
-                />
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Text>Remember me</Text>
-                </View>
-                <Switch
-                    trackColor={{ false: '#767577', true: '#81b0ff' }}
-                    thumbColor={rememberMe ? '#f5dd4b' : '#f4f3f4'}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleRememberMe}
-                    value={rememberMe}
-                />
-                <TouchableOpacity onPress={handleForgotPassword}>
-                    <Text>Forgot Password?</Text>
-                </TouchableOpacity>
-                <Button title="Login" onPress={handleLogin} />
-                <Button title="Sign Up" onPress={handleSignup} />
-            </ScrollView>
-        </KeyboardAvoidingView>
+        <SafeAreaView>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <ScrollView className='bg-white h-full' keyboardShouldPersistTaps="handled">
+                    <Text>Email</Text>
+                    <TextInput
+                        value={email}
+                        onChangeText={setEmail}
+                        placeholder="Email"
+                        autoCapitalize="none"
+                        keyboardType="email-address"
+                    />
+                    <Text>Password</Text>
+                    <TextInput
+                        value={password}
+                        onChangeText={setPassword}
+                        placeholder="Password"
+                        secureTextEntry
+                    />
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Text>Remember me</Text>
+                    </View>
+                    <Switch
+                        trackColor={{ false: '#767577', true: '#81b0ff' }}
+                        thumbColor={rememberMe ? '#f5dd4b' : '#f4f3f4'}
+                        ios_backgroundColor="#3e3e3e"
+                        onValueChange={toggleRememberMe}
+                        value={rememberMe}
+                    />
+                    <TouchableOpacity onPress={handleForgotPassword}>
+                        <Text>Forgot Password?</Text>
+                    </TouchableOpacity>
+                    <Button title="Login" onPress={handleLogin} />
+                    <Button title="Sign Up" onPress={handleSignup} />
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </SafeAreaView>
+
     );
 };
 

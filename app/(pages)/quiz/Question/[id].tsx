@@ -1,13 +1,16 @@
-import { View, Text, Image, ScrollView, TextInput, Button } from 'react-native'
+import { View, Text, Image, ScrollView, TextInput, Button, Alert, Modal } from 'react-native'
 import { images } from '@/constants/images'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import Results from '@/components/Results'
 import QuestionNav from './questionNav'
+import { useSavedStore } from '@/store/saved.store'
+import uuid from 'react-native-uuid'
+import ErrorBookSelect from '@/components/ErrorBookSelect'
 
 
 export interface Question {
-    key: number,
+    id: string,
     title: string,
     type: "MULTIPLE_CHOICE" | "LONG_ANSWER",
     question?: string, // Optional for LONG_ANSWER type
@@ -29,7 +32,7 @@ const questionDBData: questionBank[] = [
         courseID: "1204889572890471",
         questions: [
             {
-                key: 1,
+                id: uuid.v4(),
                 title: "Question 1",
                 type: "MULTIPLE_CHOICE",
                 question: "What is 2+2?",
@@ -37,14 +40,14 @@ const questionDBData: questionBank[] = [
                 answer: "4"
             },
             {
-                key: 2,
+                id: uuid.v4(),
                 title: "Question 2",
                 type: "LONG_ANSWER",
                 question: "Is π greater than 3?",
                 answer: "Yes"
             },
             {
-                key: 3,
+                id: uuid.v4(),
                 title: "Question 3",
                 type: "LONG_ANSWER",
                 question: "What is 1+1?",
@@ -57,7 +60,7 @@ const questionDBData: questionBank[] = [
         courseID: "5987259123456789",
         questions: [
             {
-                key: 1,
+                id: uuid.v4(),
                 title: "Question 1",
                 type: "MULTIPLE_CHOICE",
                 question: "What is the chemical symbol for water?",
@@ -66,7 +69,7 @@ const questionDBData: questionBank[] = [
 
             },
             {
-                key: 2,
+                id: uuid.v4(),
                 title: "Question 2",
                 type: "LONG_ANSWER",
                 question: "Is the earth flat?",
@@ -76,81 +79,57 @@ const questionDBData: questionBank[] = [
     }
 ]
 
-const savedDBData: questionBank[] = [
-    {
-        courseName: "錯題簿 1",
-        courseID: "1",
-        questions: [
-            {
-                key: 1,
-                title: "Question 1",
-                type: "MULTIPLE_CHOICE",
-                question: "What is 3+2?",
-                options: ["3", "4", "5", "6"],
-                answer: "5"
-            },
-            {
-                key: 2,
-                title: "Question 2",
-                type: "LONG_ANSWER",
-                question: "Is π greater than 3?",
-                answer: "Yes"
-            }
-        ],
-    },
-    {
-        courseName: "錯題簿 2",
-        courseID: "2",
-        questions: [
-            {
-                key: 1,
-                title: "Question 1",
-                type: "MULTIPLE_CHOICE",
-                question: "What is the chemical symbol for water?",
-                options: ["H2O", "CO2", "O2", "NaCl"],
-                answer: "H2O"
-
-            },
-        ],
-    }
-]
-
 const DisplayQuestion = () => {
+    //fetch saved questions from the store
+    const savedDBData: questionBank[] = useSavedStore(state => state.savedQuestions)
 
     const [startTime, setStartTime] = useState(new Date().getTime());
     const [finishTime, setFinishTime] = useState<number>(0);
     const [elapsedTime, setElapsedTime] = useState<number>(0);
 
     const params = useLocalSearchParams();
-    const id: string = params.id as string;
+    const id: string = params.id as string; //course ID
     const courseName: string = params.courseName as string;
     const isTimerEnabled: string = params.isTimerEnabled as string;
     const call: string = params.call as string;
     const startQuestion: number = Number(params.startQuestion);
     const numberOfQuestions: number = Number(params.numberOfQuestions);
+    //Get questionList param if present
+    const questionListParam = params.questionList as string | undefined;
+    const questionList: Question[] | undefined = questionListParam ? JSON.parse(questionListParam) : undefined;
 
     const [questions, setQuestions] = useState<Question[]>([]); // Initialize with an empty array
 
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
     const [currentQuestion, setCurrentQuestion] = useState<number>(startQuestion - 1);  //current question is used to navigate in the questionbank array
-    const [currentIndex, setCurrentIndex] = useState(1);                                //current index is used to show on the UI the question the user is doing
-    const [isQuizFinished, setIsQuizFinished] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState<number>(1);                        //current index is used to show on the UI the question the user is doing
+    const [isQuizFinished, setIsQuizFinished] = useState<boolean>(false);
 
+    //Debug log
     /* useEffect (() => {
         console.log("startQuestion: " + startQuestion + 
                     " numberOfQuestions: " + numberOfQuestions + 
                     " currentQuestion: " + currentQuestion)
     }, [startQuestion, numberOfQuestions, currentQuestion]) */
 
-
+    //fetch the question bank data based on the id and call 
     useEffect(() => {
 
         //when the component mounts, we need to find the question bank for the subject
+        // If questionList is provided, use it directly
+        // Otherwise, fetch the question bank based on the id and call
         const fetchData = async () => {
-            const questionBankData = (call === "subject_selection")? questionDBData.find(item => item.courseID === id): savedDBData.find(item => item.courseID === id)
-            if (questionBankData) {
-                setQuestions(questionBankData.questions);
-                setUserAnswers(new Array(questionBankData.questions.length).fill('')); // Initialize user answers
+            if (questionList && questionList.length > 0) {
+                setQuestions(questionList);
+                setUserAnswers(new Array(questionList.length).fill(''));
+            } else {
+                const questionBankData = (call === "subject_selection")
+                    ? questionDBData.find(item => item.courseID === id)
+                    : savedDBData.find(item => item.courseID === id);
+                if (questionBankData) {
+                    setQuestions(questionBankData.questions);
+                    setUserAnswers(new Array(questionBankData.questions.length).fill(''));
+                }
             }
         };
 
@@ -178,7 +157,7 @@ const DisplayQuestion = () => {
 
     function handleSelectedOption(option : string) {
         const newUserAnswers = [...userAnswers];
-        newUserAnswers[currentQuestion] = option;
+        newUserAnswers[currentQuestion - startQuestion + 1] = option;
         setUserAnswers(newUserAnswers);
     }
 
@@ -202,7 +181,7 @@ const DisplayQuestion = () => {
     }
 
     function restartQuiz() {
-        setUserAnswers(new Array(questions.length).fill('')); // Initialize user answers
+        setUserAnswers([]); // Initialize user answers
         setCurrentQuestion(0);
         setIsQuizFinished(false);
     }
@@ -256,6 +235,43 @@ const DisplayQuestion = () => {
 
     }
 
+    const addSavedQuestion = useSavedStore(state => state.addSavedQuestion);
+
+    //data to pass to DropdownList component
+    const dropdownData = savedDBData.map(book => ({
+        label: book.courseName,
+        value: book.courseID,
+    }));
+
+    //To control the dropdown for adding to error book
+    const [showDropdown, setShowDropdown] = useState(false);
+    const [recordToAdd, setRecordToAdd] = useState<any | null>(null);
+
+    //Function to sanitize the question object before adding to saved questions
+    //This ensures that the question object matches the expected structure in saved.store.ts
+    const sanitizeQuestion = (q: any) => ({
+        id: uuid.v4(),
+        title: q.title,
+        type: q.type,
+        question: q.question,
+        options: q.options ? q.options : [],
+        answer: q.answer,
+    });
+
+    const handleAddSingle = (question: any) => {
+        setShowDropdown(true);
+        setRecordToAdd(sanitizeQuestion(question));
+    }
+
+    const handleDropdownSelect = (courseID: any) => {
+        let recordsToAdd = [recordToAdd];
+        //Supposed add to backend, but for now i will add to savedQuestionStore locally
+        addSavedQuestion(recordsToAdd, courseID);
+        Alert.alert("Record(s) added");
+        setShowDropdown(false);
+        setRecordToAdd(null);
+    }
+
     if (isQuizFinished) {
         return <Results 
             userAnswers={userAnswers} 
@@ -265,6 +281,7 @@ const DisplayQuestion = () => {
             finishTime={finishTime} 
             call={call} 
             isTimerEnabled={isTimerEnabled} 
+            startQuestion={startQuestion}
             numberOfQuestions={numberOfQuestions}
         />;
     }
@@ -281,9 +298,42 @@ const DisplayQuestion = () => {
                 {renderQuestionContent()}
             </ScrollView>
             <Button title='previous question ' onPress={goToPrev} disabled={currentIndex === 1} />
-            <Button title='save to 錯題簿' />
+            <Button title='save to 錯題簿' onPress={() => handleAddSingle(questions[currentQuestion])} disabled={call === "saved"}/>
             <Button title={(currentIndex === numberOfQuestions) ? "Finish Quiz" : "Next"} onPress={goToNext} />
+            {/* Dropdown for selecting error book */}
+            <Modal
+                            visible={showDropdown}
+                            transparent
+                            animationType="fade"
+                            onRequestClose={() => setShowDropdown(false)}
+                        >
+                            <View style={{
+                                flex: 1,
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                backgroundColor: 'rgba(0,0,0,0.3)'
+                            }}>
+                                <View style={{
+                                    backgroundColor: '#fff',
+                                    borderRadius: 10,
+                                    padding: 20,
+                                    minWidth: 200,
+                                    alignItems: 'center'
+                                }}>
+                                    <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
+                                    <ErrorBookSelect 
+                                        data={dropdownData} 
+                                        onSelect={handleDropdownSelect} 
+                                    />
+                                    <Button title="Cancel" onPress={() => {
+                                        setShowDropdown(false);
+                                        setRecordToAdd(null);
+                                    }}/>
+                                </View>
+                            </View>
+            </Modal>
         </View>
+        
     )
 }
 

@@ -1,6 +1,10 @@
   import React, { useState } from 'react';
   import { View, Text, Modal, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 
+  //If you need to use a dropdown list just make a new one, this one is shit
+  //You need to pass data as an array of objects with 'label' and 'value' properties
+  //onSelect is a function that will be called with the selected value
+  //Update: its not shit its so fucking good please use this
   const CustomDropdown = ({ data, onSelect }) => {
     const [isModalVisible, setModalVisible] = useState(false);
     const [selectedValue, setSelectedValue] = useState(null);
