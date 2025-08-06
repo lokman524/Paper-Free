@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, Button, Text, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, ScrollView, Alert} from 'react-native';
+import { View, TextInput, Button, Text, TouchableOpacity, Switch, KeyboardAvoidingView, Platform, ScrollView, Alert, Pressable} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
 import { createUser } from '@/services/appwrite';
@@ -36,33 +36,42 @@ const Sign_up = () => {
 
   return (
      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-                <ScrollView className='bg-white h-full' keyboardShouldPersistTaps="handled">
-                    <Text>Email</Text>
-                    <TextInput
-                        value={email}
-                        onChangeText={setEmail}
-                        placeholder="Email"
-                        autoCapitalize="none"
-                        keyboardType="email-address"
-                    />
-                    <Text>Password</Text>
-                    <TextInput
-                        value={password}
-                        onChangeText={setPassword}
-                        placeholder="Password"
-                        secureTextEntry
-                    />
-                    <Text>Confirm Password</Text>
-                    <TextInput
-                        value={confirmPassword}
-                        onChangeText={setConfirmPassword}
-                        placeholder="Confirm password"
-                        secureTextEntry
-                    />
-                    <Button title="Sign Up" onPress={handleSignUp} />
-                    <Button title="Login" onPress={() => router.replace("/(login)/login")} />
-                </ScrollView>
-            </KeyboardAvoidingView>
+        <ScrollView className='bg-white mt-40 h-full rounded-3xl' keyboardShouldPersistTaps="handled">
+            <Text className='text-4xl flex-col mt-10 ml-6 font-bold'>Sign Up</Text>
+            <Text className='mt-1 ml-6 text-gray-400'>Enter your email and password to create an account</Text>
+            <TextInput
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Email"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                className=' h-12 mt-10 ml-6 mr-10 p-3  border border-gray-400 rounded-lg'
+            />
+            <TextInput
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Password"
+                secureTextEntry
+                className=' h-12 mt-7 ml-6 mr-10 p-3  border border-gray-400 rounded-lg'
+            />
+            {password && <TextInput
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm password"
+                secureTextEntry
+                className=' h-12 mt-7 ml-6 mr-10 p-3  border border-gray-400 rounded-lg'
+            />}
+            <Pressable onPress={handleSignUp} className="h-12 mt-10 ml-6 mr-10 p-2 bg-blue-400 rounded-lg flex-row justify-center ">
+                <Text className="text-white text-xl justify-center">Sign Up</Text>
+            </Pressable>  
+            <View className='flex-row justify-center'>
+                <Text className='mt-3'>{`Already have an account?`}</Text>
+                <Pressable onPress={() => router.replace({pathname: "/(login)/login", params: {showLogin: "true"}})} className="mt-3 ml-3" >
+                    <Text className="text-blue-500 ">Log In</Text>
+                </Pressable> 
+            </View> 
+        </ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 

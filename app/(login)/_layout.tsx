@@ -13,7 +13,7 @@ export default function Layout() {
             animation: 'none',           // Disable transition animations
             gestureEnabled: false,       // Disable swipe gestures
             contentStyle: {
-              backgroundColor: 'transparent', // Make sure no background shows
+              backgroundColor: "transparent", // Make sure no background shows
             },
           }}
         >
