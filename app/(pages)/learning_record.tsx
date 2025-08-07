@@ -7,6 +7,7 @@ import { useSavedStore } from '@/store/saved.store'
 import uuid from 'react-native-uuid'
 import ErrorBookSelect from '@/components/ErrorBookSelect'
 
+//TODO: format date to a more readable format
 const LearningRecord = () => {
   const allLearningRecords = useLearningRecordStore(state => state.allLearningRecords)
 
@@ -91,26 +92,33 @@ const LearningRecord = () => {
 
   if (allLearningRecords.length === 0) {
     return (
-      <View className='flex-1 bg-primary'>
-        <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-        <Text className="text-5xl text-white font-bold mt-5 mb-3">學習記錄</Text>
-        <Text className="text-white text-xl text-center">No records found.</Text>
+      <View className='flex-1 bg-white'>
+        <View className='topbar'>
+          <Text className="big-title">學習記錄</Text>
+        </View>
+        {/* Divider */}
+        <View className="my-6 mx-6 border-b border-gray-200" />
+        <Text className="text-black text-xl text-center">No records found.</Text>
       </View>
     )
   }
 
   return (
-    <View className='flex-1 bg-primary'>
-      <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-      <Text className="text-5xl text-white font-bold mt-5 mb-3">學習記錄</Text>
-      {chooseMode && (
-        <View style={{ flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
-          <Button title="Add Selected" onPress={() => {
-            handleAddSelected();
-          }} />
-          <Button title="Cancel" onPress={() => { setChooseMode(false); setSelectedQuestions([]); setRecordToAdd(null); setShowDropdown(false)}} />
-        </View>
-      )}
+    <View className='flex-1 bg-white'>
+      <View className='topbar'>
+        <Text className="big-title">學習記錄</Text>
+        {chooseMode && (
+          <View style={{ flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
+            <Button title="Add Selected" onPress={() => {
+              handleAddSelected();
+            }} />
+            <Button title="Cancel" onPress={() => { setChooseMode(false); setSelectedQuestions([]); setRecordToAdd(null); setShowDropdown(false)}} />
+          </View>
+        )}
+      </View>
+      {/* Divider */}
+      <View className="my-6 mx-6 border-b border-gray-200" />
+      
       <FlatList
         data={allLearningRecords}
         keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
@@ -135,10 +143,9 @@ const LearningRecord = () => {
                 }
               }}
               style={{ 
-                padding: 20, 
-                backgroundColor: chooseMode && selectedQuestions.includes(index) ? '#79BAEC' : '#eee',
-                marginBottom: 10 
+                backgroundColor: chooseMode && selectedQuestions.includes(index) ? '#79BAEC' : '#60a5fa',
               }}
+              className='w-full md:w-36 h-16 rounded-2xl shadow-lg items-start justify-start p-3'
             >
               <Text>Date: {(item.finishTime)}</Text>
               <Text>{index + 1}. {item.question}</Text>

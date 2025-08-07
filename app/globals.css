@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .card {
+        @apply w-full md:w-36 h-36 rounded-2xl shadow-lg items-start justify-start p-4
+    }
+    .topbar{
+        @apply flex-row justify-between items-center mt-10 mx-6;
+    }
+    .big-title {
+        @apply text-5xl text-black font-bold mt-5 mb-3;
+    }
+    .small-title {
+        @apply text-lg text-gray-500 mt-2;
+    }
+}

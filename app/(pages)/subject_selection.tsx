@@ -11,29 +11,36 @@ export const questionBankAvailable: {courseName : string, courseID : string, que
 
 const subject_selection = () => {
   return (
-    <View className='flex-1 bg-primary'>
-      <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-      <Text className="text-5xl text-white font-bold mt-5 mb-3">題庫</Text>
+    <View className=' bg-white '>
+      <View className='topbar'>
+        <View>
+          <Text className="big-title">題庫</Text>
+          <Text className="small-title">Select a Subject</Text>
+        </View>
+      </View>
+      {/* Divider */}
+      <View className="my-6 mx-6 border-b border-gray-200" />
       <ScrollView>
-        <Text className="text-white" style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, }}>Select a Subject</Text>
         {questionBankAvailable.map((questionBank) => (
-          <Link
-            key={questionBank.courseID}
-            href={{
-              pathname: "/quiz/[subject]",
-              params: {
-                subject: questionBank.courseName,
-                id: questionBank.courseID,
-                questionCount: questionBank.questionCount,
-                call: 'subject_selection'
-              }
-            }}
-            asChild
-          >
-            <Pressable style={{ padding: 20, backgroundColor: '#eee', marginBottom: 10 }}>
-              <Text>{questionBank.courseName} ({questionBank.questionCount} questions)</Text>
-            </Pressable>
-          </Link>
+          <View key={questionBank.courseID} className='mx-5 my-1'>
+            <Link
+              key={questionBank.courseID}
+              href={{
+                pathname: "/quiz/[subject]",
+                params: {
+                  subject: questionBank.courseName,
+                  id: questionBank.courseID,
+                  questionCount: questionBank.questionCount,
+                  call: 'subject_selection'
+                }
+              }}
+              asChild
+            >
+              <Pressable className='card bg-blue-400'>
+                <Text className='text-white text-lg font-bold mb-2'>{questionBank.courseName} ({questionBank.questionCount} questions)</Text>
+              </Pressable>
+            </Link>
+          </View>
         ))}
       </ScrollView>
     </View>

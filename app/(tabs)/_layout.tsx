@@ -38,9 +38,9 @@ const _layout = () => {
                 alignItems: 'center'
             },
             tabBarStyle: {
-                backgroundColor: '#0f0D23',
+                backgroundColor: '#fff',
                 paddingTop: 10,
-                borderColor: '#0f0d23'
+                borderColor: '#fff'
             }
         }}
     >

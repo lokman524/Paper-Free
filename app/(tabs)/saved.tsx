@@ -57,9 +57,9 @@ const Saved = () => {
   }
 
   return (
-    <View className='flex-1 bg-primary'>
-          <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-          <Text className="text-5xl text-white font-bold mt-5 mb-3">錯題簿</Text>
+    <View className='flex-1 bg-white'>
+      <View className='topbar'>
+          <Text className="big-title">錯題簿</Text>
           { chooseMode && (
             <View style={{ flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
               <Button title="Delete Selected" onPress={() => {
@@ -70,37 +70,44 @@ const Saved = () => {
               <Button title="Cancel" onPress={() => { setChooseMode(false); setSelectedBooks([]);}} />
             </View>
           )}
+      </View>
+
+      {/* Divider */}
+      <View className="my-6 mx-6 border-b border-gray-200" />
+          
           <ScrollView>
             <Text className="text-white" style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, }}>Select a 錯題簿</Text>
             {savedQuestionsAvailable.length === 0 ? (
               <Text className="text-white">No saved questions available.</Text>
             ) : null}
             {savedQuestionsAvailable.map((savedQuestions, index) => (
-              <Pressable 
-                key={savedQuestions.courseName}
-                onLongPress={() => handleLongPress(index)}
-                onPress={() => {
-                  if (chooseMode) {
-                    toggleSelectBook(index);
-                  } else {
-                    router.push({
-                      pathname: "/savedQuestionListDisplay",
-                      params: { 
-                        subject: savedQuestions.courseName,
-                        id: savedQuestions.courseID,
-                        questionCount: savedQuestions.questions.length,
-                      }
-                    });
-                  }
-                }}
-                style={{ 
-                  padding: 20, 
-                  backgroundColor: chooseMode && selectedBooks.includes(index) ? '#ffcccc' : '#eee',
-                  marginBottom: 10 
-                }}
-              >
-                <Text>{savedQuestions.courseName} ({savedQuestions.questions.length} questions)</Text>
-              </Pressable>
+              <View key={savedQuestions.courseID} className='mx-5 my-1'>
+                <Pressable 
+                  key={savedQuestions.courseName}
+                  onLongPress={() => handleLongPress(index)}
+                  onPress={() => {
+                    if (chooseMode) {
+                      toggleSelectBook(index);
+                    } else {
+                      router.push({
+                        pathname: "/savedQuestionListDisplay",
+                        params: { 
+                          subject: savedQuestions.courseName,
+                          id: savedQuestions.courseID,
+                          questionCount: savedQuestions.questions.length,
+                        }
+                      });
+                    }
+                  }}
+                  style={{ 
+                    backgroundColor: chooseMode && selectedBooks.includes(index) ? '#ffcccc' : '#60a5fa',
+                  }}
+                  className='card'
+                >
+                  <Text>{savedQuestions.courseName} ({savedQuestions.questions.length} questions)</Text>
+                </Pressable>
+              </View>
+              
             ))}
             <Button title='add new' onPress={() => setShowAddNewActionSheet(true)} disabled={chooseMode}/>
             {/* Action sheet that shows when user press the add new error book button */}
