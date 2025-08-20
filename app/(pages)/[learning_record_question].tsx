@@ -19,7 +19,7 @@ const LearningRecordQuestion = () => {
     const title = params.title as string;
     const question = params.question as string;
     const type = params.type as string;
-    const options = (params.options as string[])? params.options.split(',').map(option => option.trim()) : undefined; // Convert options to an array if it exists
+    const options = (params.options as string[])? params.options.split(',').map((option: string) => option.trim()) : undefined; // Convert options to an array if it exists
     const answer = params.answer as string;
     const userAnswer = params.userAnswer as string;
 
@@ -110,7 +110,7 @@ const LearningRecordQuestion = () => {
                 {options ? 
                     (   
                         <View className='flex-1'>
-                            {options.map((option: any, index: any) => (   
+                            {options.map((option: string, index: number) => (   
                                 <Text key={index} className='text-white mb-2'>
                                     {String.fromCharCode(index + 65)}. {option}
                                 </Text>

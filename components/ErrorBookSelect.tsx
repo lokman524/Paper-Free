@@ -2,8 +2,18 @@ import { View, Text, FlatList, TouchableOpacity, Button, TextInput } from 'react
 import React, { useState } from 'react'
 import { useSavedStore } from '@/store/saved.store';
 
-const ErrorBookSelect = ({ data, onSelect }) => {
-  const [selectedValue, setSelectedValue] = useState(null);
+interface DropdownItem {
+  label: string;
+  value: string;
+}
+
+interface ErrorBookSelectProps {
+  data: DropdownItem[];
+  onSelect: (value: string) => void;
+}
+
+const ErrorBookSelect = ({ data, onSelect }: ErrorBookSelectProps) => {
+  const [selectedValue, setSelectedValue] = useState<DropdownItem | null>(null);
   const [showAddNew, setShowAddNew] = useState<boolean>(false);
   const [addNewInput, setAddNewInput] = useState<string>('');
 
@@ -14,7 +24,7 @@ const ErrorBookSelect = ({ data, onSelect }) => {
     setAddNewInput(''); // Reset input when toggling
 };
 
-  const handleSelect = (item) => {
+  const handleSelect = (item: DropdownItem) => {
     setSelectedValue(item);
   };
 
@@ -45,7 +55,7 @@ const ErrorBookSelect = ({ data, onSelect }) => {
           <Button title='cancel' onPress={toggleAddNew}/>
         </>
       )}
-      <Button title='add' onPress={() => onSelect(selectedValue.value)} disabled={selectedValue===null}/>
+      <Button title='add' onPress={() => selectedValue && onSelect(selectedValue.value)} disabled={selectedValue===null}/>
     </View>
   );
 };

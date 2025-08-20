@@ -18,6 +18,9 @@ module.exports = {
           200: '#0f0d23'
         },
         accent: '#AB8BFF'
+      },
+      fontFamily: {
+        sans: ['Helvetica', 'Arial', 'sans-serif'],
       }
     },
   },

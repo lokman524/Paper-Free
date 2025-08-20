@@ -88,12 +88,12 @@ const DisplayQuestion = () => {
     const [elapsedTime, setElapsedTime] = useState<number>(0);
 
     const params = useLocalSearchParams();
-    const id: string = params.id as string; //course ID
-    const courseName: string = params.courseName as string;
-    const isTimerEnabled: string = params.isTimerEnabled as string;
-    const call: string = params.call as string;
-    const startQuestion: number = Number(params.startQuestion);
-    const numberOfQuestions: number = Number(params.numberOfQuestions);
+    const id: string = params.id as string || ''; //course ID
+    const courseName: string = params.courseName as string || '';
+    const isTimerEnabled: string = params.isTimerEnabled as string || 'false';
+    const call: string = params.call as string || '';
+    const startQuestion: number = Number(params.startQuestion) || 1;
+    const numberOfQuestions: number = Number(params.numberOfQuestions) || 1;
     //Get questionList param if present
     const questionListParam = params.questionList as string | undefined;
     const questionList: Question[] | undefined = questionListParam ? JSON.parse(questionListParam) : undefined;
@@ -220,14 +220,12 @@ const DisplayQuestion = () => {
         if (questions[currentQuestion].type === "MULTIPLE_CHOICE" && questions[currentQuestion].options) {
             return (
                 <View className='mt-5'>
-                    {questions[currentQuestion].options.map((option, index) => (
-                        <>
-                            <Button
-                                key={index}
-                                title={String.fromCharCode(index + 65) + ": " + option}
-                                onPress={() => handleSelectedOption(option)}
-                            />
-                        </>
+                    {questions[currentQuestion].options?.map((option, index) => (
+                        <Button
+                            key={index}
+                            title={String.fromCharCode(index + 65) + ": " + option}
+                            onPress={() => handleSelectedOption(option)}
+                        />
                     ))}
                 </View>
             )

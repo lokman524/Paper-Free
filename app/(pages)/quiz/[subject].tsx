@@ -21,10 +21,10 @@ const Subject = ({ }) => {
 
     //convert the query to string and number separately
     const params = useLocalSearchParams();
-    const id: string = params.id as string;
-    const courseName: string = params.subject as string;
-    const questionCount: number = Number(params.questionCount);
-    const call: string = params.call as string;
+    const id: string = params.id as string || '';
+    const courseName: string = params.subject as string || '';
+    const questionCount: number = Number(params.questionCount) || 0;
+    const call: string = params.call as string || '';
 
 
     // Check if the input is an integer
@@ -95,7 +95,7 @@ const Subject = ({ }) => {
         setTestType("-1");
         setIsTimerEnabled(false);
         setIsRandomEnabled(false);
-        router.back;
+        router.back();
     }
 
     /* useEffect (() => {
