@@ -1,78 +1,79 @@
   import React, { useState } from 'react';
-  import { View, Text, Modal, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
+  import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
+  import { Picker } from '@react-native-picker/picker';
 
-  //If you need to use a dropdown list just make a new one, this one is shit
-  //You need to pass data as an array of objects with 'label' and 'value' properties
-  //onSelect is a function that will be called with the selected value
-  //Update: its not shit its so fucking good please use this
-  const CustomDropdown = ({ data, onSelect }) => {
-    const [isModalVisible, setModalVisible] = useState(false);
-    const [selectedValue, setSelectedValue] = useState(null);
+  type Option = { label: string; value: string };
+  
+  type Props = {
+    data: Option[];
+    onSelect: (value: string) => void;
+    value?: string;
+    placeholder?: string;
+    sheetTitle?: string;
+  };
 
-    const toggleModal = () => setModalVisible(!isModalVisible);
+  const CustomDropdown = ({ data, onSelect, value, placeholder = 'Select an option', sheetTitle = 'Select' }: Props) => {
+    const [internalValue, setInternalValue] = useState<string>(value ?? '');
+    const [isVisible, setIsVisible] = useState(false);
+    const current = value ?? internalValue;
+    const [tempValue, setTempValue] = useState<string>(current);
 
-    const handleSelect = (item) => {
-      setSelectedValue(item);
-      onSelect(item.value);
-      toggleModal();
+    const open = () => {
+      setTempValue(current);
+      setIsVisible(true);
+    };
+    const close = () => setIsVisible(false);
+    const confirm = () => {
+      // commit tempValue
+      setInternalValue(tempValue);
+      if (tempValue !== '') onSelect(tempValue);
+      setIsVisible(false);
     };
 
+    // Label to show on the field
+    const selectedLabel =
+      (data.find((d) => d.value === current)?.label) || placeholder;
+
     return (
-      <View style={styles.container}>
-        <TouchableOpacity onPress={toggleModal}>
-          <Text className='text-white'>{selectedValue ? selectedValue.label : "Select an option"}</Text>
+      <>
+        <TouchableOpacity onPress={open} className='border border-gray-300 rounded-2xl p-3'>
+          <Text>{selectedLabel}</Text>
         </TouchableOpacity>
-        <Modal visible={isModalVisible} transparent>
-          <View style={styles.modalBackground}>
-            <View style={styles.modalContent}>
-              <FlatList
-                data={data}
-                keyExtractor={(item) => item.value}
-                renderItem={({ item }) => (
-                  <TouchableOpacity onPress={() => handleSelect(item)}>
-                    <Text style={styles.option}>{item.label}</Text>
-                  </TouchableOpacity>
-                )}
-              />
-              <TouchableOpacity onPress={toggleModal}>
-                <Text style={styles.closeButton}>Close</Text>
-              </TouchableOpacity>
+
+        <Modal visible={isVisible} transparent animationType="slide" onRequestClose={close}>
+          <View style={{ flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+            <View style={{ backgroundColor: 'white', borderTopLeftRadius: 16, borderTopRightRadius: 16, maxHeight: '55%', paddingBottom: 8 }}>
+              {/* Toolbar */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 10 }}>
+                <TouchableOpacity onPress={close}>
+                  <Text style={{ color: '#3b82f6', fontSize: 16 }}>Cancel</Text>
+                </TouchableOpacity>
+                <View style={{ flex: 1, alignItems: 'center' }}>
+                  <Text style={{ fontSize: 16, fontWeight: '600' }}>{sheetTitle}</Text>
+                </View>
+                <TouchableOpacity onPress={confirm}>
+                  <Text style={{ color: '#3b82f6', fontSize: 16, fontWeight: '600' }}>Done</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Picker
+                selectedValue={tempValue}
+                onValueChange={(val: string) => setTempValue(val)}
+                {...(Platform.OS === 'android' ? { mode: 'dialog' as const } : {})}
+                style={{ backgroundColor: 'white', ...(Platform.OS === 'ios' ? { height: 216 } : null) }}
+                itemStyle={Platform.OS === 'ios' ? { fontSize: 18, color: '#111827' } : undefined}
+                {...(Platform.OS === 'android' ? { dropdownIconColor: '#111827' } : {})}
+              >
+                <Picker.Item label={placeholder} value="" color="#9CA3AF" />
+                {(data && data.length > 0 ? data : []).map((item) => (
+                  <Picker.Item key={item.value} label={item.label} value={item.value} color="#111827" />
+                ))}
+              </Picker>
             </View>
           </View>
         </Modal>
-      </View>
+      </>
     );
   };
-
-  const styles = StyleSheet.create({
-    container: {
-      margin: 20,
-    },
-    modalBackground: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalContent: {
-      width: '80%',
-      backgroundColor: 'white',
-      borderRadius: 10,
-      padding: 20,
-    },
-    option: {
-      padding: 15,
-      borderBottomWidth: 1,
-      borderBottomColor: '#ddd',
-    },
-    closeButton: {
-      marginTop: 10,
-      padding: 10,
-      backgroundColor: '#e74c3c',
-      borderRadius: 5,
-      textAlign: 'center',
-      color: 'white',
-    },
-  });
 
   export default CustomDropdown;

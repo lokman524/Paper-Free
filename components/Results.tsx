@@ -6,7 +6,7 @@ import { Question } from '@/app/(pages)/quiz/Question/[id]';
 import { useLearningRecordStore } from '@/store/learningRecord.store';
 import uuid from 'react-native-uuid';
 import { useSavedStore } from '@/store/saved.store';
-import ErrorBookSelect from './ErrorBookSelect';
+import CustomDropdown from '@/components/DropdownList';
 
 export const unstable_settings = {
   gestureEnabled: false // Disables swipe back
@@ -39,6 +39,16 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
         const month = String(date.getMonth() + 1).padStart(2, '0'); 
         const day = String(date.getDate()).padStart(2, '0'); 
         return `${year}-${month}-${day}`; // YYYY-MM-DD
+    }
+
+    // Format elapsed time (ms) to hh:mm:ss
+    function formatElapsedTime(ms: number) {
+        const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const pad = (n: number) => String(n).padStart(2, '0');
+        return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
     }
 
     // Function to generate learning record, which includes the user's answers
@@ -88,6 +98,7 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
     //To control the dropdown for adding to error book
     const [showDropdown, setShowDropdown] = useState(false);
     const [recordToAdd, setRecordToAdd] = useState<any | null>(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
     //Function to sanitize the question object before adding to saved questions
     //This ensures that the question object matches the expected structure in saved.store.ts
@@ -116,45 +127,71 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
     }
 
     return (
-        <View className='flex-1 bg-primary'>
-            <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-            <Text className='text-white mt-10'>Quiz completed!</Text>
-            <Text className='text-white'>Your Score: {score/numberOfQuestions * 100}% ({score}/{numberOfQuestions})</Text>
-            {isTimerEnabled === "true" && <Text className='text-white mt-5'>Time Used: {(finishTime - startTime) / 1000} seconds</Text>}
-            <Button title='add whole quiz to error book' onPress={() => handleAddSelected()} disabled={call === "saved"} />
-            <Button title='go back' onPress={handleGoBack}/>
-            {/* Dropdown for selecting error book */}
-                <Modal
-                      visible={showDropdown}
-                      transparent
-                      animationType="fade"
-                      onRequestClose={() => setShowDropdown(false)}
-                >
-                      <View style={{
-                          flex: 1,
-                          justifyContent: 'center',
-                          alignItems: 'center',
-                          backgroundColor: 'rgba(0,0,0,0.3)'
-                      }}>
-                          <View style={{
-                              backgroundColor: '#fff',
-                              borderRadius: 10,
-                              padding: 20,
-                              minWidth: 200,
-                              alignItems: 'center'
-                          }}>
-                              <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
-                              <ErrorBookSelect 
-                                  data={dropdownData} 
-                                  onSelect={handleDropdownSelect} 
-                              />
-                              <Button title="Cancel" onPress={() => {
-                                setShowDropdown(false);
-                                setRecordToAdd(null);
-                              }}/>
-                          </View>
-                      </View>
-                </Modal>
+        <View className="flex-1 bg-gray-50">
+            {/* Main Content Area */}
+            <View className="flex-1 p-6">
+                {/* Header */}
+                <View className="mb-6 mt-5">
+                    <Text className="text-4xl font-bold text-gray-800 mb-2">Quiz Completed! ⭐</Text>
+                    <Text className="text-lg text-gray-600">Great job on finishing the quiz</Text>
+                </View>
+                
+                {/* Results Card */}
+                <View className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <Text className="text-2xl font-bold text-gray-800 mb-4">Your Results</Text>
+                    <Text className="text-xl text-gray-700 mb-2">Score: {Math.round(score/numberOfQuestions * 100)}% ({score}/{numberOfQuestions})</Text>
+                    <Text className="text-lg text-gray-600 mb-2">Completed: {new Date(finishTime).toLocaleString()}</Text>
+                    <Text className="text-lg text-gray-600 mb-2">Elapsed Time: {formatElapsedTime(finishTime - startTime)}</Text>
+                    {isTimerEnabled === "true" && (
+                        <Text className="text-lg text-gray-600">Time Used: {Math.round((finishTime - startTime) / 1000)} seconds</Text>
+                    )}
+                </View>
+                
+                {/* Actions Card */}
+                <View className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <Text className="text-lg font-semibold text-gray-700 mb-4">Actions</Text>
+                    <View className="space-y-3">
+                        <Button 
+                            title='Add Whole Quiz to Error Book' 
+                            onPress={() => handleAddSelected()} 
+                            disabled={call === "saved"} 
+                        />
+                        <Button title='Go Back' onPress={handleGoBack}/>
+                    </View>
+                </View>
+            </View>
+            
+            {/* Modal */}
+            <Modal
+                visible={showDropdown}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowDropdown(false)}
+            >
+                <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View className="bg-white rounded-lg p-6 m-4 min-w-80 w-11/12">
+                        <Text className="text-lg font-semibold text-gray-800 mb-2">Add to Error Book</Text>
+                        <Text className="text-gray-600 mb-4">Choose an error book to add these questions:</Text>
+
+                        <CustomDropdown
+                            data={dropdownData}
+                            value={selectedCourseId}
+                            onSelect={(val: string) => setSelectedCourseId(val)}
+                            placeholder="Select error book"
+                            sheetTitle="Select Error Book"
+                        />
+
+                        <View className="mt-6 space-y-3">
+                            <Button
+                                title="Add"
+                                onPress={() => selectedCourseId && handleDropdownSelect(selectedCourseId)}
+                                disabled={!selectedCourseId}
+                            />
+                            <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); setSelectedCourseId(''); }} />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </View>
     )
 }

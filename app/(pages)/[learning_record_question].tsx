@@ -1,16 +1,9 @@
-import { View, Text, Image, ScrollView, Button, BackHandler, Alert, Modal} from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { router, useLocalSearchParams, useNavigation} from 'expo-router'
-import { images } from '@/constants/images';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { View, Text, ScrollView, Button, Alert, Modal, TouchableOpacity } from 'react-native'
+import React, { useState } from 'react'
+import { router, useLocalSearchParams } from 'expo-router'
 import uuid from 'react-native-uuid';
 import { useSavedStore } from '@/store/saved.store';
 import ErrorBookSelect from '@/components/ErrorBookSelect';
-
-//This does not fucking work too and i don't know why
-export const unstable_settings = {
-  gestureEnabled: false // Disables swipe back
-};
 
 //This is a page showing question from learning record specifically
 //Normally i should reuse the question component but i fucked up the code there so i'll just make a new one
@@ -71,110 +64,96 @@ const LearningRecordQuestion = () => {
         setRecordToAdd(null);
     }
 
-    //Custom back handler (for android)
-    //I think this will work but i haven't tested it yet
-    useEffect(() => {
-        const backAction = () => {
-            router.back;
-            console.log("Back button pressed");
-            return true; // Prevent default back action
-        } 
-        const backHandler = BackHandler.addEventListener(
-            "hardwareBackPress",
-            backAction
-        );
-        return () => backHandler.remove(); 
-    },[])
-
-    //Custom back handler (for iOS)
-    //Update: It does not fucking work and i don't know why
-    //Update: Again expo go does not support this 
-    //FUCK EXPO GO
-    const navigation = useNavigation();
-    useEffect(() => {
-        const gestureEndListener = () => {
-            console.log('iOS back gesture ended');
-        };
-
-        const unsubscribe = navigation.addListener("gestureEnd", gestureEndListener);
-        return unsubscribe;
-    }, [navigation]);
+  // Render helpers aligned with [id].tsx styling
+  function renderQuestionContent() {
+    return (
+      <>
+        {question ? (
+          <Text className="text-2xl text-gray-800 leading-8 mb-6">{question}</Text>
+        ) : null}
+        {type === 'MULTIPLE_CHOICE' && options ? (
+          <View className="mt-4">
+            {options.map((option: string, index: number) => {
+              const isSelected = userAnswer === option;
+              return (
+                <TouchableOpacity
+                  key={index}
+                  className="flex-row items-center p-3 mb-2 border border-gray-200 rounded-lg"
+                  activeOpacity={0.8}
+                >
+                  <View className="w-5 h-5 rounded-full border-2 border-gray-400 mr-3 items-center justify-center">
+                    {isSelected && <View className="w-3 h-3 rounded-full bg-blue-500" />}
+                  </View>
+                  <Text className={`text-xl flex-1 ${isSelected ? 'text-blue-700 font-medium' : 'text-gray-700'}`}>
+                    {String.fromCharCode(index + 65)}. {option}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ) : null}
+        {type === 'LONG_ANSWER' && (
+          <View className="mt-4">
+            <Text className="text-lg text-gray-700">This is a long answer question.</Text>
+          </View>
+        )}
+      </>
+    );
+  }
 
   return (
-    <View className='flex-1 bg-primary'>
-        <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-        <SafeAreaView>
-            <ScrollView>
-                <Text className="text-xl text-white font-bold mt-5 mb-3">{title}</Text>
-                <Text className="text-xl text-white font-bold mt-5 mb-3">Question: {question}</Text>
-                {options ? 
-                    (   
-                        <View className='flex-1'>
-                            {options.map((option: string, index: number) => (   
-                                <Text key={index} className='text-white mb-2'>
-                                    {String.fromCharCode(index + 65)}. {option}
-                                </Text>
-                            ))}
-                            <Button title='show your answer' onPress={toggleShowUserAnswer}/>
-                            {showUserAnswer && (
-                                <Text className='text-white mt-2'>Your Answer: {userAnswer}</Text>
-                            )}
-                            <Button title='show model answer' onPress={toggleShowAnswer}/>
-                            {showAnswer && (
-                                    <Text className='text-white mt-2'>Model Answer: {answer}</Text>
-                            )}
-                        </View>
-                    )
-                    : 
-                    (
-                        <View className='flex-1'>
-                            <Button title='show your answer' onPress={toggleShowUserAnswer}/>
-                            {showUserAnswer && (
-                                <Text className='text-white mt-2'>Your Answer: {userAnswer}</Text>
-                            )}
-                            <Button title='show model answer' onPress={toggleShowAnswer}/>
-                            {showAnswer && (
-                                    <Text className='text-white mt-2'>Model Answer: {answer}</Text>
-                            )}
-                        </View>
-                    )
-                }
-                <Button title='add to error book' onPress={() => handleAddSingle()}/>
-                <Button title='go back' onPress={() => {router.back()}}/>
-            </ScrollView>
-        </SafeAreaView>
-        {/* Dropdown for selecting error book */}
-        <Modal
-                        visible={showDropdown}
-                        transparent
-                        animationType="fade"
-                        onRequestClose={() => setShowDropdown(false)}
-                    >
-                        <View style={{
-                            flex: 1,
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            backgroundColor: 'rgba(0,0,0,0.3)'
-                        }}>
-                            <View style={{
-                                backgroundColor: '#fff',
-                                borderRadius: 10,
-                                padding: 20,
-                                minWidth: 200,
-                                alignItems: 'center'
-                            }}>
-                                <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
-                                <ErrorBookSelect 
-                                    data={dropdownData} 
-                                    onSelect={handleDropdownSelect} 
-                                />
-                                <Button title="Cancel" onPress={() => {
-                                    setShowDropdown(false);
-                                    setRecordToAdd(null);
-                                }}/>
-                            </View>
-                        </View>
-        </Modal>
+    <View className="flex-1 flex-row">
+      {/* Main Content Area */}
+      <View className="flex-1 p-6">
+        {/* Header */}
+        <View className="mb-4 mt-5">
+          <Text className="text-4xl font-bold text-gray-800 mb-2">{title}</Text>
+          <Text className="text-2xl text-gray-600">Learning Record</Text>
+        </View>
+
+        {/* Question Content */}
+        <ScrollView className="flex-1 mb-6">
+          <View className="bg-white p-6 rounded-lg shadow-sm">
+            {renderQuestionContent()}
+            {/* Answers toggles */}
+            <View className="mt-6">
+              <Button title={showUserAnswer ? 'Hide Your Answer' : 'Show Your Answer'} onPress={toggleShowUserAnswer} />
+              {showUserAnswer && (
+                <Text className="text-gray-700 text-lg mt-2">Your Answer: {userAnswer || '-'}</Text>
+              )}
+            </View>
+            <View className="mt-4">
+              <Button title={showAnswer ? 'Hide Model Answer' : 'Show Model Answer'} onPress={toggleShowAnswer} />
+              {showAnswer && (
+                <Text className="text-gray-700 text-lg mt-2">Model Answer: {answer || '-'}</Text>
+              )}
+            </View>
+          </View>
+        </ScrollView>
+
+        {/* Action Buttons */}
+        <View className="flex-row justify-end items-center">
+          <Button title='Save to 錯題簿' onPress={() => handleAddSingle()} />
+          <View style={{ width: 12 }} />
+          <Button title='Back' onPress={() => router.back()} />
+        </View>
+      </View>
+
+      {/* Dropdown for selecting error book */}
+      <Modal
+        visible={showDropdown}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowDropdown(false)}
+      >
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
+          <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 20, minWidth: 200, alignItems: 'center' }}>
+            <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
+            <ErrorBookSelect data={dropdownData} onSelect={handleDropdownSelect} />
+            <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); }} />
+          </View>
+        </View>
+      </Modal>
     </View>
   )
 }

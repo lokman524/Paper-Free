@@ -1,8 +1,7 @@
 import CustomDropdown from '@/components/DropdownList'
-import { images } from '@/constants/images'
-import { Link, router, useLocalSearchParams } from 'expo-router'
-import React, { useState, useEffect } from 'react'
-import { Alert, Button, FlatList, Image, Switch, Text, TextInput, View } from 'react-native'
+import { router, useLocalSearchParams, Stack } from 'expo-router'
+import React, { useState } from 'react'
+import { Alert, Button, Switch, Text, TextInput, View } from 'react-native'
 
 
 const Subject = ({ }) => {
@@ -10,7 +9,7 @@ const Subject = ({ }) => {
     type TestTypeInterface = "1" | "2" | "3" | "-1";
 
     const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-    const [numberOfQuestionsInput, setNumberOfQuestionsInput] = useState("");
+    const [numberOfQuestionsInput, setNumberOfQuestionsInput] = useState("1");
     const [startQuestionInput, setStartQuestionInput] = useState("1");
     const [isTimerEnabled, setIsTimerEnabled] = useState(false);
     const [isRandomEnabled, setIsRandomEnabled] = useState(false);
@@ -25,6 +24,7 @@ const Subject = ({ }) => {
     const courseName: string = params.subject as string || '';
     const questionCount: number = Number(params.questionCount) || 0;
     const call: string = params.call as string || '';
+    const prevTitle = call === 'subject_selection' ? 'Subjects' : call === 'saved' ? 'Saved' : 'Back';
 
 
     // Check if the input is an integer
@@ -68,7 +68,7 @@ const Subject = ({ }) => {
         else if (Number(startQuestionInput) > questionCount) {
             Alert.alert("Question number cannot be larger than the total number of questions")
         }
-        else if((Number(startQuestionInput)-1+Number(numberOfQuestionsInput)-1) > questionCount-1 ){
+        else if ((Number(startQuestionInput) - 1 + Number(numberOfQuestionsInput) - 1) > questionCount - 1) {
             Alert.alert("Number of questions in this range is larger than the total number of questions")
         }
         else {
@@ -79,9 +79,9 @@ const Subject = ({ }) => {
                 params: {
                     id: id,                     //This is the course ID
                     courseName: courseName,     //This is the course name
-                    isTimerEnabled: isTimerEnabled.toString(), 
+                    isTimerEnabled: isTimerEnabled.toString(),
                     call: call,                 //To determine weather the call is from the questionbank or saved page
-                    startQuestion: startQuestionInput,   
+                    startQuestion: startQuestionInput,
                     numberOfQuestions: numberOfQuestionsInput,
                 }
             });
@@ -90,7 +90,7 @@ const Subject = ({ }) => {
 
     const handleGoBack = () => {
         setIsFormSubmitted(false);
-        setNumberOfQuestionsInput("");
+        setNumberOfQuestionsInput("1");
         setStartQuestionInput("1");
         setTestType("-1");
         setIsTimerEnabled(false);
@@ -107,57 +107,125 @@ const Subject = ({ }) => {
     }, [isFormSubmitted]) */
 
     return (
-        <View className='flex-1 bg-primary'>
-            <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-            <Text className="text-5xl text-white font-bold mt-5 mb-3">{courseName}</Text>
-            <View>
-                <Text className='text-white'>Test type</Text>
-                <CustomDropdown
-                    data={[
-                        { label: 'Type 1', value: '1' },
-                        { label: 'Type 2', value: '2' },
-                        { label: 'Type 3', value: '3' },
-                    ]}
-                    onSelect={handleDropdownSelect}
-                />
-                <Text className='text-white'>Number of questions {"/ " + questionCount}</Text>
-                <TextInput
-                    className='h-10 border border-white rounded p-2 text-white'
-                    placeholder="Enter number of questions here"
-                    placeholderTextColor="lightgray"
-                    onChangeText={text => setNumberOfQuestionsInput(text)}
-                />
-                {!isRandomEnabled &&
-                    <>
-                        <Text className='text-white'>Start from question number: </Text>
-                        <TextInput
-                            className='h-10 border border-white rounded p-2 text-white'
-                            placeholder="1"
-                            placeholderTextColor="lightgray"
-                            onChangeText={text => setStartQuestionInput(text)}
-                        />
-                    </>
-                }
-                <Text className='text-white'>Enable Timer?</Text>
-                <Switch
-                    trackColor={{ false: '#767577', true: '#81b0ff' }}
-                    thumbColor={isTimerEnabled ? '#f5dd4b' : '#f4f3f4'}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleTimerSwitch}
-                    value={isTimerEnabled}
-                />
-                <Text className='text-white'>Random?</Text>
-                <Switch
-                    trackColor={{ false: '#767577', true: '#81b0ff' }}
-                    thumbColor={isRandomEnabled ? '#f5dd4b' : '#f4f3f4'}
-                    ios_backgroundColor="#3e3e3e"
-                    onValueChange={toggleRandomSwitch}
-                    value={isRandomEnabled}
-                />
-                <Button title='submit' onPress={handleSubmit} />
-                <Button title='go back' onPress={router.back} />
+        <View className="flex-1 bg-gray-50">
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    title: '',
+                    headerBackTitle: prevTitle,
+                }}
+            />
+            
+            {/* Main Content Area */}
+            <View className="flex-1 p-6">
+                {/* Header */}
+                <View className="mb-6">
+                    <Text className="text-2xl font-bold text-gray-800 mb-2">Start A Test</Text>
+                    <Text className="text-lg text-gray-600">Test your knowledge by revising what you have did wrong.</Text>
+                </View>
+                
+                {/* Course Info Card */}
+                <View className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <Text className="text-2xl font-bold text-gray-800 mb-4">{courseName}</Text>
+                    <Text className="text-sm text-gray-500">Total Questions Available: {questionCount}</Text>
+                </View>
+                
+                {/* Form Card */}
+                <View className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <View className="space-y-6">
+                        {/* Test Type */}
+                        <View>
+                            <Text className="text-lg font-semibold text-gray-700 mb-3">Test Type</Text>
+                            <CustomDropdown
+                                data={[
+                                    { label: 'Type 1', value: '1' },
+                                    { label: 'Type 2', value: '2' },
+                                    { label: 'Type 3', value: '3' },
+                                ]}
+                                value={testType === '-1' ? '' : testType}
+                                onSelect={(val: string) => setTestType(val as TestTypeInterface)}
+                            />
+                        </View>
+                        
+                        {/* Number of Questions */}
+                        <View>
+                            <Text className="text-lg font-semibold text-gray-700 mb-3">Number of Questions</Text>
+                            <TextInput
+                                value={numberOfQuestionsInput}
+                                keyboardType="phone-pad"
+                                inputMode="numeric"
+                                placeholder="1"
+                                placeholderTextColor="#9CA3AF"
+                                className="border border-gray-300 rounded-lg p-4 text-base bg-gray-50"
+                                onChangeText={(text) => {
+                                    const cleaned = text.replace(/[^0-9]/g, '');
+                                    if (cleaned === '') {
+                                        setNumberOfQuestionsInput('');
+                                        return;
+                                    }
+                                    const n = Number(cleaned);
+                                    const clamped = Math.min(Math.max(1, n), Math.max(1, questionCount));
+                                    setNumberOfQuestionsInput(String(clamped));
+                                }}
+                            />
+                        </View>
+                        
+                        {/* Start Question (only if not random) */}
+                        {!isRandomEnabled && (
+                            <View>
+                                <Text className="text-lg font-semibold text-gray-700 mb-3">Start from Question Number</Text>
+                                <TextInput
+                                    value={startQuestionInput}
+                                    keyboardType="phone-pad"
+                                    inputMode="numeric"
+                                    placeholder="1"
+                                    placeholderTextColor="#9CA3AF"
+                                    className="border border-gray-300 rounded-lg p-4 text-base bg-gray-50"
+                                    onChangeText={(text) => {
+                                        const cleaned = text.replace(/[^0-9]/g, '');
+                                        if (cleaned === '') {
+                                            setStartQuestionInput('');
+                                            return;
+                                        }
+                                        const n = Number(cleaned);
+                                        const clamped = Math.min(Math.max(1, n), Math.max(1, questionCount));
+                                        setStartQuestionInput(String(clamped));
+                                    }}
+                                />
+                            </View>
+                        )}
+                        
+                        {/* Timer Toggle */}
+                        <View className="flex-row items-center justify-between py-2">
+                            <View>
+                                <Text className="text-lg font-semibold text-gray-700">Enable Timer</Text>
+                                <Text className="text-sm text-gray-500 mt-1">Track your completion time</Text>
+                            </View>
+                            <Switch
+                                onValueChange={toggleTimerSwitch}
+                                value={isTimerEnabled}
+                            />
+                        </View>
+                        
+                        {/* Random Toggle */}
+                        <View className="flex-row items-center justify-between py-2">
+                            <View>
+                                <Text className="text-lg font-semibold text-gray-700">Random Order</Text>
+                                <Text className="text-sm text-gray-500 mt-1">Randomize question sequence</Text>
+                            </View>
+                            <Switch
+                                onValueChange={toggleRandomSwitch}
+                                value={isRandomEnabled}
+                            />
+                        </View>
+                    </View>
+                </View>
+                
+                {/* Submit Button */}
+                <View className="bg-white p-4 rounded-lg shadow-sm">
+                    <Button title="Start Test" onPress={handleSubmit} />
+                </View>
             </View>
-
         </View>
     )
 }

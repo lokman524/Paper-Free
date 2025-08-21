@@ -44,10 +44,10 @@ export default function Index() {
       <View className="my-6 mx-6 border-b border-gray-200" />
 
       {/* Card Row */}
-      <View className="flex-column md:flex-row justify-start gap-2 mx-5">
+      <View className="page-content">
         <Pressable
           onPress={() => router.push("/subject_selection")}
-          className="card bg-orange-400"
+          className="card bg-orange-400 mb-2"
           style={{ elevation: 4 }}
         >
           <Text className="text-white text-lg font-bold mb-2">Question Bank</Text>
@@ -55,7 +55,7 @@ export default function Index() {
         </Pressable>
         <Pressable
           onPress={() => router.push("/saved")}
-          className="card bg-red-400"
+          className="card bg-red-400 mb-2"
           style={{ elevation: 4 }}
         >
           <Text className="text-white text-lg font-bold mb-2">Error Books</Text>
@@ -63,7 +63,7 @@ export default function Index() {
         </Pressable>
         <Pressable
           onPress={() => router.push("/learning_record")}
-          className="card bg-green-400"
+          className="card bg-green-400 mb-2"
           style={{ elevation: 4 }}
         >
           <Text className="text-white text-lg font-bold mb-2">Learning Records</Text>

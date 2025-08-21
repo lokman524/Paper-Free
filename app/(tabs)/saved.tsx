@@ -1,4 +1,4 @@
-import { View, Text, Image, ScrollView, Pressable, Button, TextInput, Modal} from 'react-native'
+import { View, Text, Image, ScrollView, Pressable, Button, TextInput, Modal, useWindowDimensions} from 'react-native'
 import React, { useState } from 'react'
 import { images } from '@/constants/images'
 import { Link, router } from 'expo-router';
@@ -56,6 +56,9 @@ const Saved = () => {
     setLongPressedIndex(null);
   }
 
+  const { width } = useWindowDimensions();
+  const isPhone = width < 768;
+
   return (
     <View className='flex-1 bg-white'>
       <View className='topbar'>
@@ -75,8 +78,14 @@ const Saved = () => {
       {/* Divider */}
       <View className="my-6 mx-6 border-b border-gray-200" />
           
-          <ScrollView>
-            <Text className="text-white" style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, }}>Select a 錯題簿</Text>
+          <ScrollView
+          contentContainerStyle={{
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: isPhone ? 'center' : 'flex-start',
+          }}
+          className='mx-10'>
+          
             {savedQuestionsAvailable.length === 0 ? (
               <Text className="text-white">No saved questions available.</Text>
             ) : null}
@@ -104,12 +113,12 @@ const Saved = () => {
                   }}
                   className='card'
                 >
-                  <Text>{savedQuestions.courseName} ({savedQuestions.questions.length} questions)</Text>
+                  <Text className='text-white text-lg font-bold mb-2'>{savedQuestions.courseName}</Text>
+                  <Text className='text-white'>{savedQuestions.questions.length} questions</Text>
                 </Pressable>
               </View>
               
             ))}
-            <Button title='add new' onPress={() => setShowAddNewActionSheet(true)} disabled={chooseMode}/>
             {/* Action sheet that shows when user press the add new error book button */}
             <Modal
                 visible={showAddNewActionSheet}
@@ -176,6 +185,31 @@ const Saved = () => {
               </View>
             </Modal>
           </ScrollView>
+          
+          {/* Fixed Add New Button */}
+          <Pressable
+            onPress={() => setShowAddNewActionSheet(true)}
+            disabled={chooseMode}
+            style={{
+              position: 'absolute',
+              bottom: 30,
+              right: 20,
+              backgroundColor: chooseMode ? '#cccccc' : '#60a5fa',
+              borderRadius: 25,
+              paddingHorizontal: 20,
+              paddingVertical: 12,
+              flexDirection: 'row',
+              alignItems: 'center',
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 4,
+              elevation: 5,
+            }}
+          >
+            <Text style={{ color: 'white', fontSize: 20, marginRight: 8 }}>+</Text>
+            <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>Add New</Text>
+          </Pressable>
         </View>
   )
 }

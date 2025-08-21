@@ -1,5 +1,4 @@
-import { View, Text, Image, ScrollView, TextInput, Button, Alert, Modal } from 'react-native'
-import { images } from '@/constants/images'
+import { View, Text, ScrollView, TextInput, Button, Alert, Modal, TouchableOpacity } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useLocalSearchParams } from 'expo-router'
 import Results from '@/components/Results'
@@ -188,49 +187,68 @@ const DisplayQuestion = () => {
 
     function renderQuestionContent() {
         if (!questions[currentQuestion]) {
-            return <Text className='text-xl text-white font-bold mt-5 mb-3'>Question not found</Text>;
+            return <Text className="text-lg text-gray-600">Question not found</Text>;
         }
         return (
             <>
-                <Text className='text-xl text-white font-bold mt-5 mb-3'>{questions[currentQuestion].question}</Text>
+                <Text className="text-2xl text-gray-800 leading-8 mb-6">
+                    {questions[currentQuestion].question}
+                </Text>
                 {renderQuestionInput()}
             </>
         );
     }
 
     function renderQuestionInput() {
-
-        // if (!questions[currentQuestion]) {
-        //     return <Text className='text-xl text-white font-bold mt-5 mb-3'>Question not found</Text>;
-        // }
-
         // For LONG_ANSWER type questions, render a TextInput for user input
         if (questions[currentQuestion].type === "LONG_ANSWER") {
             return (
-                <TextInput
-                    className='h-10 border border-white rounded p-2 mt-5 text-white'
-                    placeholder="Type your answer here"
-                    placeholderTextColor="lightgray"
-                    onChangeText={text => handleSelectedOption(text)}
-                />
-            )
-        }
-
-        // For MULTIPLE_CHOICE type questions, render options as buttons
-        if (questions[currentQuestion].type === "MULTIPLE_CHOICE" && questions[currentQuestion].options) {
-            return (
-                <View className='mt-5'>
-                    {questions[currentQuestion].options?.map((option, index) => (
-                        <Button
-                            key={index}
-                            title={String.fromCharCode(index + 65) + ": " + option}
-                            onPress={() => handleSelectedOption(option)}
-                        />
-                    ))}
+                <View className="mt-4">
+                    <TextInput
+                        className="border border-gray-300 rounded-lg p-4 min-h-32 text-xl"
+                        placeholder="Type your answer here"
+                        multiline
+                        value={userAnswers[currentQuestion - startQuestion + 1] || ''}
+                        onChangeText={text => handleSelectedOption(text)}
+                    />
                 </View>
             )
         }
 
+        // For MULTIPLE_CHOICE type questions, render options as native radio buttons
+        if (questions[currentQuestion].type === "MULTIPLE_CHOICE" && questions[currentQuestion].options) {
+            const currentAnswer = userAnswers[currentQuestion - startQuestion + 1];
+            
+            return (
+                <View className="mt-4">
+                    {questions[currentQuestion].options?.map((option, index) => {
+                        const isSelected = currentAnswer === option;
+                        
+                        return (
+                            <TouchableOpacity
+                                key={index}
+                                className="flex-row items-center p-3 mb-2 border border-gray-200 rounded-lg"
+                                onPress={() => handleSelectedOption(option)}
+                            >
+                                {/* Radio Button */}
+                                <View className="w-5 h-5 rounded-full border-2 border-gray-400 mr-3 items-center justify-center">
+                                    {isSelected && (
+                                        <View className="w-3 h-3 rounded-full bg-blue-500" />
+                                    )}
+                                </View>
+                                
+                                {/* Option Text */}
+                                <Text className={`text-xl flex-1 ${
+                                    isSelected ? 'text-blue-700 font-medium' : 'text-gray-700'
+                                }`}>
+                                    {String.fromCharCode(index + 65)}. {option}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </View>
+            )
+        }
     }
 
     const addSavedQuestion = useSavedStore(state => state.addSavedQuestion);
@@ -285,53 +303,62 @@ const DisplayQuestion = () => {
     }
 
     return (
-        
-        <View className='flex-1 bg-primary'>
-            <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-            <Text className="text-5xl text-white font-bold mt-5 mb-3">{courseName}</Text>
-            <QuestionNav questions={questions} setQuestion={setCurrentQuestion} setCurrentIndex={setCurrentIndex} startQuestion={startQuestion} numberOfQuestions={numberOfQuestions}/>
-            <Text className='text-white text-xl mb-5'>Question {currentIndex} of {numberOfQuestions}</Text>
-            {isTimerEnabled === "true" && <Text className='text-white text-lg mb-5'>Time Elapsed: {formatElapsedTime(elapsedTime)} </Text>}
-            <ScrollView>
-                {renderQuestionContent()}
-            </ScrollView>
-            <Button title='previous question ' onPress={goToPrev} disabled={currentIndex === 1} />
-            <Button title='save to 錯題簿' onPress={() => handleAddSingle(questions[currentQuestion])} disabled={call === "saved"}/>
-            <Button title={(currentIndex === numberOfQuestions) ? "Finish Quiz" : "Next"} onPress={goToNext} />
-            {/* Dropdown for selecting error book */}
+        <View className="flex-1 flex-row">
+            {/* Sidebar Navigation */}
+            <QuestionNav 
+                questions={questions} 
+                setQuestion={setCurrentQuestion} 
+                setCurrentIndex={setCurrentIndex} 
+                startQuestion={startQuestion} 
+                numberOfQuestions={numberOfQuestions}
+                currentIndex={currentIndex}
+                userAnswers={userAnswers}
+            />
+            
+            {/* Main Content Area */}
+            <View className="flex-1 p-6">
+                {/* Header */}
+                <View className="mb-4 mt-5">
+                    <Text className="text-4xl font-bold text-gray-800 mb-2">{courseName}</Text>
+                    <Text className="text-2xl text-gray-600">Question {currentIndex} of {numberOfQuestions}</Text>
+                    {isTimerEnabled === "true" && <Text className="text-lg text-gray-500 mt-1">Time Elapsed: {formatElapsedTime(elapsedTime)}</Text>}
+                </View>
+                
+                {/* Question Content */}
+                <ScrollView className="flex-1 mb-6">
+                    <View className="bg-white p-6 rounded-lg shadow-sm">
+                        {renderQuestionContent()}
+                    </View>
+                </ScrollView>
+                
+                {/* Action Buttons */}
+                <View className="flex-row justify-between items-center">
+                    <Button title='Previous' onPress={goToPrev} disabled={currentIndex === 1} />
+                    <Button title='Save to 錯題簿' onPress={() => handleAddSingle(questions[currentQuestion])} disabled={call === "saved"}/>
+                    <Button title={(currentIndex === numberOfQuestions) ? "Finish Quiz" : "Next"} onPress={goToNext} />
+                </View>
+            </View>
             <Modal
-                            visible={showDropdown}
-                            transparent
-                            animationType="fade"
-                            onRequestClose={() => setShowDropdown(false)}
-                        >
-                            <View style={{
-                                flex: 1,
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                backgroundColor: 'rgba(0,0,0,0.3)'
-                            }}>
-                                <View style={{
-                                    backgroundColor: '#fff',
-                                    borderRadius: 10,
-                                    padding: 20,
-                                    minWidth: 200,
-                                    alignItems: 'center'
-                                }}>
-                                    <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
-                                    <ErrorBookSelect 
-                                        data={dropdownData} 
-                                        onSelect={handleDropdownSelect} 
-                                    />
-                                    <Button title="Cancel" onPress={() => {
-                                        setShowDropdown(false);
-                                        setRecordToAdd(null);
-                                    }}/>
-                                </View>
-                            </View>
+                visible={showDropdown}
+                transparent
+                animationType="fade"
+                onRequestClose={() => setShowDropdown(false)}
+            >
+                <View>
+                    <View>
+                        <Text>Select an error book to add record(s):</Text>
+                        <ErrorBookSelect 
+                            data={dropdownData} 
+                            onSelect={handleDropdownSelect} 
+                        />
+                        <Button title="Cancel" onPress={() => {
+                            setShowDropdown(false);
+                            setRecordToAdd(null);
+                        }}/>
+                    </View>
+                </View>
             </Modal>
         </View>
-        
     )
 }
 

@@ -1,8 +1,7 @@
-import { View, Text, Image, Button, FlatList, Pressable, Modal, Alert } from 'react-native';
+import { View, Text, Button, FlatList, Pressable, Modal, Alert } from 'react-native';
 import React, { useState } from 'react';
 import { useSavedStore } from '@/store/saved.store';
-import { Link, useLocalSearchParams } from 'expo-router';
-import { images } from '@/constants/images';
+import { Link, useLocalSearchParams, Stack } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const SavedQuestionListDisplay = () => {
@@ -101,108 +100,159 @@ const SavedQuestionListDisplay = () => {
 
 
     return (
-        <SafeAreaView className='flex-1 bg-primary'>
-            <Image source={images.bg} className='flex-1 absolute w-full z-0' resizeMode='cover' />
-            <Text className="text-5xl text-white font-bold mt-5 mb-3">{courseName}</Text>
-            <Link
-                href={chooseMode 
-                        ? {
-                            pathname: "/quiz/Question/[id]",
-                            params: {
-                                id: id,
-                                courseName: courseName,
-                                isTimerEnabled: "true",
-                                call: "saved",
-                                startQuestion: "1",
-                                numberOfQuestions: `${selectedQuestions.length}`,
-                                questionList: JSON.stringify(selectedQuestions.map(idx => allSavedQuestions.find(item => item.courseID === id).questions[idx])),
-                            }
-                        } 
-                        : {
-                            pathname: "/quiz/[subject]",
-                            params: { 
-                                subject: courseName,
-                                id: id,
-                                questionCount: questionCount,
-                                call: "saved",
-                            }
-                        }} 
-                asChild
-                disabled={questionCount === 0}  // Disable link if no questions
-            >
-                <Button title={chooseMode ? "Start quiz with selected questions" : "Start Quiz"} />
-            </Link>
-            { chooseMode && (
-                <View style={{ flexDirection: 'row', justifyContent: 'center', margin: 10 }}>
-                    <Button title="Delete Selected" onPress={() => {
-                        handleDeleteSelected();
-                    }} />
-                    <Button title="Cancel" onPress={() => { setChooseMode(false); setSelectedQuestions([]);}} />
-                </View>
-            )}
-            <FlatList 
-                data={allSavedQuestions.find(item => item.courseID === id)?.questions || []}
-                keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
-                renderItem={({ item, index }) => (
-                    <>
-                        <Pressable 
-                          onLongPress={() => handleLongPress(index)}
-                          onPress={() => chooseMode ? toggleSelectQuestion(index) : toggleShowQuestion(index)} 
-                          style={{ 
-                            padding: 20, 
-                            backgroundColor: chooseMode && selectedQuestions.includes(index) ? '#79BAEC' : '#eee', 
-                            marginBottom: 10 
-                          }}
-                        >
-                            <Text className='text-black mb-2'>{index + 1}. {item.title}</Text>
-                        </Pressable>
-                        {toggleQuestions[index] && ( // Check the specific toggle state for this question
-                            <>
-                              <Text className='text-white'>{item.question}</Text>
-                              {item.options && item.options.map((option: string, index: number) => (
-                                  <Text key={index} className='text-white mb-2'>
-                                      {String.fromCharCode(index + 65)}. {option}
-                                  </Text>
-                              ))}
-                              <Button title='show answer' onPress={() => toggleShowAnswer(index)}/>
-                              {toggleAnswers[index] && (
-                                <Text className='text-white mt-2'>Answer: {item.answer}</Text>
-                              )}
-                            </>
-                        )}
-                    </>
-                )}
-                ListEmptyComponent={() => (
-                    <Text className='text-white text-center'>No questions here</Text>
-                )}
+        <View className="flex-1 bg-gray-50">
+            <Stack.Screen
+                options={{
+                    headerShown: true,
+                    title: '',
+                    headerBackTitle: 'Saved',
+                    headerStyle: {
+                        backgroundColor: '#f9fafb', // bg-gray-50
+                    },
+                    headerTintColor: '#6b7280', // text-gray-500
+                }}
             />
-            {/* Action sheet that shows when user long press a record */}
-            <Modal
-                visible={actionSheetVisible}
-                transparent
-                animationType="fade"
-                onRequestClose={() => setActionSheetVisible(false)}
-            >
-                <View style={{
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    backgroundColor: 'rgba(0,0,0,0.3)'
-                }}>
-                    <View style={{
-                        backgroundColor: '#fff',
-                        borderRadius: 10,
-                        padding: 20,
-                        minWidth: 200,
-                        alignItems: 'center'
-                    }}>
-                        <Button title="Delete this record" onPress={handleDeleteSingle} />
-                        <Button title="Enter choose mode" onPress={handleEnterChooseMode} />
-                        <Button title="Cancel" onPress={() => {setActionSheetVisible(false); setLongPressedIndex(null)}} />
-                    </View>
+            
+            {/* Main Content Area */}
+            <View className="flex-1 p-6">
+                {/* Header */}
+                <View className="mb-6">
+                    <Text className="text-2xl font-bold text-gray-800 mb-2">Saved Questions</Text>
+                    <Text className="text-lg text-gray-600">Review your saved questions and start practicing.</Text>
                 </View>
-            </Modal>
-        </SafeAreaView>
+                
+                {/* Course Info Card */}
+                <View className="bg-white p-6 rounded-lg shadow-sm mb-6">
+                    <Text className="text-2xl font-bold text-gray-800 mb-4">{courseName}</Text>
+                    <Text className="text-sm text-gray-500">Total Questions: {questionCount}</Text>
+                </View>
+                {/* Action Buttons Card */}
+                <View className="bg-white p-4 rounded-lg shadow-sm mb-6">
+                    <Link
+                        href={chooseMode 
+                                ? {
+                                    pathname: "/quiz/Question/[id]",
+                                    params: {
+                                        id: id,
+                                        courseName: courseName,
+                                        isTimerEnabled: "true",
+                                        call: "saved",
+                                        startQuestion: "1",
+                                        numberOfQuestions: `${selectedQuestions.length}`,
+                                        questionList: JSON.stringify(selectedQuestions.map(idx => allSavedQuestions.find(item => item.courseID === id).questions[idx])),
+                                    }
+                                } 
+                                : {
+                                    pathname: "/quiz/[subject]",
+                                    params: { 
+                                        subject: courseName,
+                                        id: id,
+                                        questionCount: questionCount,
+                                        call: "saved",
+                                    }
+                                }} 
+                        asChild
+                        disabled={questionCount === 0}  // Disable link if no questions
+                    >
+                        <Button title={chooseMode ? "Start quiz with selected questions" : "Start Quiz"} />
+                    </Link>
+                    { chooseMode && (
+                        <View style={{ flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 }}>
+                            <Button title="Delete Selected" onPress={() => {
+                                handleDeleteSelected();
+                            }} />
+                            <Button title="Cancel" onPress={() => { setChooseMode(false); setSelectedQuestions([]);}} />
+                        </View>
+                    )}
+                </View>
+                
+                {/* Questions List Card */}
+                <View className="bg-white rounded-lg shadow-sm flex-1">
+                    <FlatList 
+                        data={allSavedQuestions.find(item => item.courseID === id)?.questions || []}
+                        keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+                        contentContainerStyle={{ padding: 16 }}
+                        renderItem={({ item, index }) => (
+                            <View className="mb-4">
+                                <Pressable 
+                                  onLongPress={() => handleLongPress(index)}
+                                  onPress={() => chooseMode ? toggleSelectQuestion(index) : toggleShowQuestion(index)} 
+                                  className={`p-4 rounded-lg border ${
+                                    chooseMode && selectedQuestions.includes(index) 
+                                      ? 'bg-blue-100 border-blue-300' 
+                                      : 'bg-gray-50 border-gray-200'
+                                  }`}
+                                >
+                                    <Text className='text-gray-800 font-semibold text-base'>{index + 1}. {item.title}</Text>
+                                </Pressable>
+                                {toggleQuestions[index] && (
+                                    <View className="mt-3 p-4 bg-gray-100 rounded-lg">
+                                      <Text className='text-gray-800 mb-3 font-medium'>{item.question}</Text>
+                                      {item.options && item.options.map((option: string, optionIndex: number) => (
+                                          <Text key={optionIndex} className='text-gray-700 mb-2 ml-2'>
+                                              {String.fromCharCode(optionIndex + 65)}. {option}
+                                          </Text>
+                                      ))}
+                                      <View className="mt-3">
+                                        <Button title='Show Answer' onPress={() => toggleShowAnswer(index)}/>
+                                      </View>
+                                      {toggleAnswers[index] && (
+                                        <View className="mt-3 p-3 bg-green-100 rounded-lg">
+                                          <Text className='text-green-800 font-semibold'>Answer: {item.answer}</Text>
+                                        </View>
+                                      )}
+                                    </View>
+                                )}
+                            </View>
+                        )}
+                        ListEmptyComponent={() => (
+                            <View className="flex-1 justify-center items-center py-12">
+                                <Text className='text-gray-500 text-center text-lg'>No questions saved yet</Text>
+                                <Text className='text-gray-400 text-center mt-2'>Questions you save will appear here</Text>
+                            </View>
+                        )}
+                    />
+                </View>
+                
+                {/* Action sheet that shows when user long press a record */}
+                <Modal
+                    visible={actionSheetVisible}
+                    transparent
+                    animationType="fade"
+                    onRequestClose={() => setActionSheetVisible(false)}
+                >
+                    <View style={{
+                        flex: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        backgroundColor: 'rgba(0,0,0,0.3)'
+                    }}>
+                        <View style={{
+                            backgroundColor: '#fff',
+                            borderRadius: 12,
+                            padding: 24,
+                            minWidth: 280,
+                            alignItems: 'center',
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.25,
+                            shadowRadius: 4,
+                            elevation: 5,
+                        }}>
+                            <View style={{ width: '100%', marginBottom: 12 }}>
+                                <Button title="Delete this record" onPress={handleDeleteSingle} />
+                            </View>
+                            <View style={{ width: '100%', marginBottom: 12 }}>
+                                <Button title="Enter choose mode" onPress={handleEnterChooseMode} />
+                            </View>
+                            <View style={{ width: '100%' }}>
+                                <Button title="Cancel" onPress={() => {setActionSheetVisible(false); setLongPressedIndex(null)}} />
+                            </View>
+                        </View>
+                    </View>
+                </Modal>
+            </View>
+        </View>
     );
 }
 
