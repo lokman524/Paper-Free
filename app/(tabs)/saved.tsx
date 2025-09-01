@@ -82,9 +82,9 @@ const Saved = () => {
           contentContainerStyle={{
             flexDirection: 'row',
             flexWrap: 'wrap',
-            justifyContent: isPhone ? 'center' : 'flex-start',
+            justifyContent: 'flex-start',
           }}
-          className='mx-10'>
+          className= {isPhone ? 'mx-1' : 'mx-10'}>
           
             {savedQuestionsAvailable.length === 0 ? (
               <Text className="text-white">No saved questions available.</Text>

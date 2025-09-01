@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router'
 import uuid from 'react-native-uuid';
 import { useSavedStore } from '@/store/saved.store';
 import ErrorBookSelect from '@/components/ErrorBookSelect';
+import CustomDropdown from '@/components/DropdownList';
 
 //This is a page showing question from learning record specifically
 //Normally i should reuse the question component but i fucked up the code there so i'll just make a new one
@@ -38,6 +39,7 @@ const LearningRecordQuestion = () => {
     //To control the dropdown for adding to error book
     const [showDropdown, setShowDropdown] = useState(false);
     const [recordToAdd, setRecordToAdd] = useState<any | null>(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
     //Function to sanitize the question object before adding to saved questions
     //This ensures that the question object matches the expected structure in saved.store.ts
@@ -146,12 +148,30 @@ const LearningRecordQuestion = () => {
         animationType="fade"
         onRequestClose={() => setShowDropdown(false)}
       >
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.3)' }}>
-          <View style={{ backgroundColor: '#fff', borderRadius: 10, padding: 20, minWidth: 200, alignItems: 'center' }}>
-            <Text className='text-black mb-2'>Select an error book to add record(s):</Text>
-            <ErrorBookSelect data={dropdownData} onSelect={handleDropdownSelect} />
-            <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); }} />
-          </View>
+        <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View className="bg-white rounded-lg p-6 m-4 ">
+            <Text className="text-lg font-semibold text-gray-800 mb-2">Add to Error Book</Text>
+            <Text className="text-gray-600 mb-4">Choose an error book to add these questions:</Text>
+            <CustomDropdown
+              data={dropdownData}
+              value={selectedCourseId}
+              onSelect={(val: string) => setSelectedCourseId(val)}
+              placeholder="Select error book"
+              sheetTitle="Select Error Book"
+            />
+            <ErrorBookSelect 
+              data={dropdownData} 
+              onSelect={handleDropdownSelect} 
+            />
+            <View className="mt-6 space-y-3">
+              <Button
+                title="Add"
+                onPress={() => selectedCourseId && handleDropdownSelect(selectedCourseId)}
+                disabled={!selectedCourseId}
+              />
+              <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); setSelectedCourseId(''); }} />
+            </View>
+          </View>    
         </View>
       </Modal>
     </View>

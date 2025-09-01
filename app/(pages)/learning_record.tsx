@@ -5,6 +5,7 @@ import { Stack, router } from 'expo-router'
 import { useSavedStore } from '@/store/saved.store'
 import uuid from 'react-native-uuid'
 import CustomDropdown from '@/components/DropdownList'
+import ErrorBookSelect from '@/components/ErrorBookSelect'
 
 //TODO: format date to a more readable format
 const LearningRecord = () => {
@@ -139,7 +140,7 @@ const LearningRecord = () => {
       ) : (
         <FlatList
           data={allLearningRecords}
-          keyExtractor={(item, index) => item.id ? item.id.toString() : index.toString()}
+          keyExtractor={(item, index) => index.toString()}
           renderItem={({ item, index }) => {
             const isCorrect = item?.userAnswer === item?.answer;
             const selected = chooseMode && selectedQuestions.includes(index);
@@ -242,6 +243,10 @@ const LearningRecord = () => {
               onSelect={(val: string) => setSelectedCourseId(val)}
               placeholder="Select error book"
               sheetTitle="Select Error Book"
+            />
+            <ErrorBookSelect 
+              data={dropdownData} 
+              onSelect={handleDropdownSelect} 
             />
             <View className="mt-6 space-y-3">
               <Button

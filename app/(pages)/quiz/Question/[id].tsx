@@ -6,6 +6,7 @@ import QuestionNav from './questionNav'
 import { useSavedStore } from '@/store/saved.store'
 import uuid from 'react-native-uuid'
 import ErrorBookSelect from '@/components/ErrorBookSelect'
+import CustomDropdown from '@/components/DropdownList'
 
 
 export interface Question {
@@ -262,6 +263,7 @@ const DisplayQuestion = () => {
     //To control the dropdown for adding to error book
     const [showDropdown, setShowDropdown] = useState(false);
     const [recordToAdd, setRecordToAdd] = useState<any | null>(null);
+    const [selectedCourseId, setSelectedCourseId] = useState<string>('');
 
     //Function to sanitize the question object before adding to saved questions
     //This ensures that the question object matches the expected structure in saved.store.ts
@@ -344,18 +346,30 @@ const DisplayQuestion = () => {
                 animationType="fade"
                 onRequestClose={() => setShowDropdown(false)}
             >
-                <View>
-                    <View>
-                        <Text>Select an error book to add record(s):</Text>
-                        <ErrorBookSelect 
-                            data={dropdownData} 
-                            onSelect={handleDropdownSelect} 
+                <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <View className="bg-white rounded-lg p-6 m-4 ">
+                    <Text className="text-lg font-semibold text-gray-800 mb-2">Add to Error Book</Text>
+                    <Text className="text-gray-600 mb-4">Choose an error book to add these questions:</Text>
+                    <CustomDropdown
+                        data={dropdownData}
+                        value={selectedCourseId}
+                        onSelect={(val: string) => setSelectedCourseId(val)}
+                        placeholder="Select error book"
+                        sheetTitle="Select Error Book"
+                    />
+                    <ErrorBookSelect 
+                        data={dropdownData} 
+                        onSelect={handleDropdownSelect} 
+                    />
+                    <View className="mt-6 space-y-3">
+                        <Button
+                        title="Add"
+                        onPress={() => selectedCourseId && handleDropdownSelect(selectedCourseId)}
+                        disabled={!selectedCourseId}
                         />
-                        <Button title="Cancel" onPress={() => {
-                            setShowDropdown(false);
-                            setRecordToAdd(null);
-                        }}/>
+                        <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); setSelectedCourseId(''); }} />
                     </View>
+                    </View>    
                 </View>
             </Modal>
         </View>

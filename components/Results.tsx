@@ -7,6 +7,7 @@ import { useLearningRecordStore } from '@/store/learningRecord.store';
 import uuid from 'react-native-uuid';
 import { useSavedStore } from '@/store/saved.store';
 import CustomDropdown from '@/components/DropdownList';
+import ErrorBookSelect from './ErrorBookSelect';
 
 export const unstable_settings = {
   gestureEnabled: false // Disables swipe back
@@ -169,10 +170,9 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
                 onRequestClose={() => setShowDropdown(false)}
             >
                 <View className="flex-1 justify-center items-center" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <View className="bg-white rounded-lg p-6 m-4 min-w-80 w-11/12">
+                    <View className="bg-white rounded-lg p-6 m-4 ">
                         <Text className="text-lg font-semibold text-gray-800 mb-2">Add to Error Book</Text>
                         <Text className="text-gray-600 mb-4">Choose an error book to add these questions:</Text>
-
                         <CustomDropdown
                             data={dropdownData}
                             value={selectedCourseId}
@@ -180,7 +180,10 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
                             placeholder="Select error book"
                             sheetTitle="Select Error Book"
                         />
-
+                        <ErrorBookSelect 
+                            data={dropdownData} 
+                            onSelect={handleDropdownSelect} 
+                        />
                         <View className="mt-6 space-y-3">
                             <Button
                                 title="Add"
@@ -189,7 +192,7 @@ const Results = ({userAnswers, questionBank, restartQuiz, startTime, finishTime,
                             />
                             <Button title="Cancel" onPress={() => { setShowDropdown(false); setRecordToAdd(null); setSelectedCourseId(''); }} />
                         </View>
-                    </View>
+                    </View>    
                 </View>
             </Modal>
         </View>
